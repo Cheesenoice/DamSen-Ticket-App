@@ -1,0 +1,223 @@
+{
+  "designSystem": {
+    "name": "Tab Navigation Design System",
+    "platform": "React Native Expo",
+    "type": "bottom-tab-navigation",
+    "version": "1.0.0"
+  },
+  "layout": {
+    "type": "horizontal-tab-bar",
+    "alignment": "center",
+    "distribution": "space-evenly",
+    "container": {
+      "backgroundColor": "#FFFFFF",
+      "paddingHorizontal": 16,
+      "paddingVertical": 12,
+      "shadowColor": "#000",
+      "shadowOffset": { "width": 0, "height": -2 },
+      "shadowOpacity": 0.1,
+      "shadowRadius": 4,
+      "elevation": 5
+    }
+  },
+  "tabs": {
+    "count": 5,
+    "items": [
+      {
+        "id": "home",
+        "label": "Home",
+        "iconPath": "assets/tab/Home.png",
+        "type": "standard"
+      },
+      {
+        "id": "ticket",
+        "label": "Ticket",
+        "iconPath": "assets/tab/Ticket.png",
+        "type": "standard"
+      },
+      {
+        "id": "qr",
+        "label": "QR",
+        "iconPath": "assets/tab/QR.png",
+        "type": "special",
+        "alwaysActive": true
+      },
+      {
+        "id": "map",
+        "label": "Map",
+        "iconPath": "assets/tab/Map.png",
+        "type": "standard"
+      },
+      {
+        "id": "account",
+        "label": "Account",
+        "iconPath": "assets/tab/Account.png",
+        "type": "standard"
+      }
+    ]
+  },
+  "styling": {
+    "tabItem": {
+      "default": {
+        "container": {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "paddingVertical": 8,
+          "paddingHorizontal": 12,
+          "minWidth": 60,
+          "height": 60
+        },
+        "icon": {
+          "width": 24,
+          "height": 24,
+          "tintColor": "#9CA3AF"
+        },
+        "label": {
+          "fontSize": 12,
+          "fontWeight": "400",
+          "color": "#9CA3AF",
+          "marginTop": 4,
+          "textAlign": "center"
+        }
+      },
+      "active": {
+        "container": {
+          "backgroundColor": "#FDE3F2",
+          "borderRadius": 25,
+          "width": 70,
+          "height": 60,
+          "alignItems": "center",
+          "justifyContent": "center",
+          "paddingVertical": 8,
+          "paddingHorizontal": 12
+        },
+        "icon": {
+          "width": 24,
+          "height": 24,
+          "tintColor": "#9CA3AF"
+        },
+        "label": {
+          "fontSize": 12,
+          "fontWeight": "400",
+          "color": "#9CA3AF",
+          "marginTop": 4,
+          "textAlign": "center"
+        }
+      },
+      "qrSpecial": {
+        "container": {
+          "backgroundColor": "#D1FBD0",
+          "borderRadius": 25,
+          "width": 60,
+          "height": 60,
+          "alignItems": "center",
+          "justifyContent": "center",
+          "paddingVertical": 8,
+          "paddingHorizontal": 12
+        },
+        "icon": {
+          "width": 24,
+          "height": 24,
+          "tintColor": "#FFFFFF"
+        },
+        "label": {
+          "fontSize": 12,
+          "fontWeight": "400",
+          "color": "#4B5563",
+          "marginTop": 4,
+          "textAlign": "center"
+        }
+      }
+    }
+  },
+  "colors": {
+    "primary": {
+      "qrBackground": "#D1FBD0",
+      "activeTabBackground": "#FDE3F2",
+      "tabBarBackground": "#FFFFFF"
+    },
+    "neutral": {
+      "inactiveIcon": "#9CA3AF",
+      "inactiveLabel": "#9CA3AF",
+      "activeIcon": "#9CA3AF",
+      "activeLabel": "#9CA3AF",
+      "qrIcon": "#FFFFFF",
+      "qrLabel": "#4B5563"
+    },
+    "shadow": {
+      "color": "#000000",
+      "opacity": 0.1
+    }
+  },
+  "dimensions": {
+    "tabBar": {
+      "height": 84,
+      "paddingHorizontal": 16,
+      "paddingVertical": 12
+    },
+    "tabItem": {
+      "default": {
+        "minWidth": 60,
+        "height": 60
+      },
+      "active": {
+        "width": 70,
+        "height": 60,
+        "borderRadius": 25
+      },
+      "qrSpecial": {
+        "width": 60,
+        "height": 60,
+        "borderRadius": 25
+      }
+    },
+    "icon": {
+      "width": 24,
+      "height": 24
+    },
+    "label": {
+      "fontSize": 12,
+      "marginTop": 4
+    }
+  },
+  "animations": {
+    "tabPress": {
+      "type": "scale",
+      "duration": 150,
+      "scale": 0.95
+    },
+    "activeStateChange": {
+      "type": "spring",
+      "duration": 300,
+      "springConfig": {
+        "damping": 15,
+        "stiffness": 150
+      }
+    }
+  },
+  "behavior": {
+    "activeState": {
+      "showBackground": true,
+      "maintainIconColor": true,
+      "maintainLabelColor": true
+    },
+    "qrTab": {
+      "alwaysShowBackground": true,
+      "specialStyling": true,
+      "backgroundColor": "#D1FBD0"
+    },
+    "interaction": {
+      "hapticFeedback": true,
+      "pressAnimation": true
+    }
+  },
+  "accessibility": {
+    "tabRole": "tab",
+    "tabBarRole": "tablist",
+    "announceSelection": true,
+    "minimumTouchTarget": {
+      "width": 44,
+      "height": 44
+    }
+  }
+}

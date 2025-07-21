@@ -1,45 +1,29 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from "expo-router";
+import CustomTabBar from "./CustomTabBar";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
+        tabBarActiveTintColor: "#ffd33d",
+        headerStyle: {
+          backgroundColor: "#D1FBD0",
+        },
+        headerShadowVisible: false,
+        headerTintColor: "#000",
+        tabBarStyle: {
+          backgroundColor: "#25292e",
+          marginBottom: 16, // hoặc marginBottom: 16
+        },
+      }}
+    >
+      <Tabs.Screen name="index" options={{ title: "Trang chủ" }} />
+      <Tabs.Screen name="about" options={{ title: "About" }} />
+      <Tabs.Screen name="ticket" options={{ title: "Ticket" }} />
+      <Tabs.Screen name="qr" options={{ title: "QR" }} />
+      <Tabs.Screen name="map" options={{ title: "Map", headerShown: false }} />
+      <Tabs.Screen name="explore" options={{ title: "Explore" }} />
     </Tabs>
   );
 }

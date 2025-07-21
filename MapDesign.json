@@ -1,0 +1,568 @@
+{
+  "designSystem": {
+    "name": "Theme Park Interactive Map App",
+    "version": "1.0.0",
+    "description": "Immersive theme park navigation app with interactive map, ride information, and queue management",
+    "platform": "react-native",
+    "theme": "playful_adventure"
+  },
+  "screenStructure": {
+    "layout": "full_screen_map_with_overlays",
+    "components": {
+      "statusBar": {
+        "style": "dark_content",
+        "backgroundColor": "transparent"
+      },
+      "header": {
+        "type": "floating_transparent",
+        "height": 60,
+        "components": ["back_button", "search_button", "menu_button"]
+      },
+      "mainContent": {
+        "type": "interactive_map",
+        "fullScreen": true,
+        "overlay": "bottom_sheet_content"
+      },
+      "bottomSheet": {
+        "type": "draggable_bottom_sheet",
+        "states": ["collapsed", "expanded"],
+        "components": ["ride_info_card", "queue_status", "action_buttons"]
+      },
+      "navigation": {
+        "type": "bottom_tab_bar",
+        "position": "absolute_bottom",
+        "style": "floating_with_shadow"
+      }
+    }
+  },
+  "colorPalette": {
+    "primary": {
+      "green": "#8BC34A",
+      "lightGreen": "#C8E6C9",
+      "darkGreen": "#689F38"
+    },
+    "secondary": {
+      "blue": "#03A9F4",
+      "lightBlue": "#B3E5FC",
+      "darkBlue": "#0277BD"
+    },
+    "accent": {
+      "pink": "#E91E63",
+      "lightPink": "#FDE3F2",
+      "orange": "#FF9800",
+      "yellow": "#FFC107"
+    },
+    "neutral": {
+      "white": "#FFFFFF",
+      "lightGray": "#F5F5F5",
+      "gray": "#9E9E9E",
+      "darkGray": "#424242",
+      "black": "#000000"
+    },
+    "functional": {
+      "success": "#4CAF50",
+      "warning": "#FF9800",
+      "error": "#F44336",
+      "info": "#2196F3"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "primary": "System",
+      "secondary": "System",
+      "weights": ["400", "500", "600", "700"]
+    },
+    "sizes": {
+      "h1": 28,
+      "h2": 24,
+      "h3": 20,
+      "h4": 18,
+      "body": 16,
+      "bodySmall": 14,
+      "caption": 12,
+      "micro": 10
+    },
+    "styles": {
+      "rideTitle": {
+        "fontSize": 18,
+        "fontWeight": "600",
+        "color": "#000000"
+      },
+      "queueTime": {
+        "fontSize": 24,
+        "fontWeight": "700",
+        "color": "#000000"
+      },
+      "queueLabel": {
+        "fontSize": 12,
+        "fontWeight": "400",
+        "color": "#666666"
+      },
+      "locationName": {
+        "fontSize": 14,
+        "fontWeight": "500",
+        "color": "#FFFFFF",
+        "textShadow": "0 1px 2px rgba(0,0,0,0.8)"
+      }
+    }
+  },
+  "components": {
+    "header": {
+      "container": {
+        "position": "absolute",
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "height": 100,
+        "backgroundColor": "transparent",
+        "paddingTop": 50,
+        "paddingHorizontal": 16,
+        "zIndex": 1000
+      },
+      "buttons": {
+        "backButton": {
+          "position": "left",
+          "backgroundColor": "#FFFFFF",
+          "borderRadius": 20,
+          "width": 40,
+          "height": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "shadowColor": "#000000",
+          "shadowOffset": { "width": 0, "height": 2 },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 4,
+          "elevation": 3
+        },
+        "searchButton": {
+          "position": "center",
+          "backgroundColor": "#FFFFFF",
+          "borderRadius": 20,
+          "width": 40,
+          "height": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "shadowColor": "#000000",
+          "shadowOffset": { "width": 0, "height": 2 },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 4,
+          "elevation": 3
+        },
+        "menuButton": {
+          "position": "right",
+          "backgroundColor": "#FFFFFF",
+          "borderRadius": 20,
+          "width": 40,
+          "height": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "shadowColor": "#000000",
+          "shadowOffset": { "width": 0, "height": 2 },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 4,
+          "elevation": 3
+        }
+      }
+    },
+    "interactiveMap": {
+      "container": {
+        "flex": 1,
+        "backgroundColor": "#8BC34A"
+      },
+      "mapView": {
+        "flex": 1,
+        "backgroundColor": "#8BC34A"
+      },
+      "mapPins": {
+        "default": {
+          "backgroundColor": "#FFFFFF",
+          "borderRadius": 15,
+          "width": 30,
+          "height": 30,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "borderWidth": 2,
+          "borderColor": "#E91E63"
+        },
+        "selected": {
+          "backgroundColor": "#E91E63",
+          "borderColor": "#FFFFFF",
+          "transform": [{ "scale": 1.2 }]
+        }
+      },
+      "locationLabels": {
+        "container": {
+          "backgroundColor": "rgba(0,0,0,0.7)",
+          "borderRadius": 12,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+          "marginTop": 4
+        },
+        "text": {
+          "color": "#FFFFFF",
+          "fontSize": 12,
+          "fontWeight": "500",
+          "textAlign": "center"
+        }
+      }
+    },
+    "rideInfoCard": {
+      "container": {
+        "backgroundColor": "#FFFFFF",
+        "borderRadius": 16,
+        "padding": 16,
+        "marginHorizontal": 16,
+        "marginBottom": 16,
+        "shadowColor": "#000000",
+        "shadowOffset": { "width": 0, "height": 4 },
+        "shadowOpacity": 0.1,
+        "shadowRadius": 8,
+        "elevation": 4
+      },
+      "header": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "marginBottom": 12
+      },
+      "icon": {
+        "width": 48,
+        "height": 48,
+        "borderRadius": 12,
+        "marginRight": 12
+      },
+      "title": {
+        "fontSize": 18,
+        "fontWeight": "600",
+        "color": "#000000",
+        "flex": 1
+      },
+      "distance": {
+        "fontSize": 14,
+        "fontWeight": "400",
+        "color": "#666666"
+      }
+    },
+    "queueStatus": {
+      "container": {
+        "backgroundColor": "#F8F9FA",
+        "borderRadius": 12,
+        "padding": 16,
+        "marginHorizontal": 16,
+        "marginBottom": 16
+      },
+      "header": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "marginBottom": 12
+      },
+      "warningIcon": {
+        "width": 24,
+        "height": 24,
+        "marginRight": 8
+      },
+      "queueGrid": {
+        "flexDirection": "row",
+        "justifyContent": "space-between"
+      },
+      "queueItem": {
+        "flex": 1,
+        "alignItems": "center",
+        "padding": 12
+      },
+      "queueTime": {
+        "fontSize": 24,
+        "fontWeight": "700",
+        "color": "#000000",
+        "marginBottom": 4
+      },
+      "queueLabel": {
+        "fontSize": 12,
+        "fontWeight": "400",
+        "color": "#666666"
+      }
+    },
+    "bottomSheet": {
+      "container": {
+        "position": "absolute",
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "backgroundColor": "#FFFFFF",
+        "borderTopLeftRadius": 20,
+        "borderTopRightRadius": 20,
+        "paddingTop": 8,
+        "minHeight": 200,
+        "shadowColor": "#000000",
+        "shadowOffset": { "width": 0, "height": -4 },
+        "shadowOpacity": 0.1,
+        "shadowRadius": 8,
+        "elevation": 8
+      },
+      "handle": {
+        "width": 40,
+        "height": 4,
+        "backgroundColor": "#E0E0E0",
+        "borderRadius": 2,
+        "alignSelf": "center",
+        "marginBottom": 12
+      }
+    },
+    "locationBanner": {
+      "container": {
+        "position": "absolute",
+        "bottom": 120,
+        "left": 16,
+        "right": 16,
+        "backgroundColor": "#8BC34A",
+        "borderRadius": 25,
+        "paddingHorizontal": 20,
+        "paddingVertical": 12,
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "shadowColor": "#000000",
+        "shadowOffset": { "width": 0, "height": 2 },
+        "shadowOpacity": 0.2,
+        "shadowRadius": 4,
+        "elevation": 4
+      },
+      "text": {
+        "color": "#FFFFFF",
+        "fontSize": 16,
+        "fontWeight": "600"
+      },
+      "icon": {
+        "width": 24,
+        "height": 24,
+        "tintColor": "#FFFFFF"
+      }
+    },
+    "bottomNavigation": {
+      "container": {
+        "position": "absolute",
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "height": 90,
+        "backgroundColor": "#FFFFFF",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "space-around",
+        "paddingHorizontal": 20,
+        "paddingBottom": 20,
+        "shadowColor": "#000000",
+        "shadowOffset": { "width": 0, "height": -2 },
+        "shadowOpacity": 0.1,
+        "shadowRadius": 8,
+        "elevation": 5,
+        "borderTopWidth": 1,
+        "borderTopColor": "rgba(0, 0, 0, 0.1)"
+      },
+      "tabItem": {
+        "alignItems": "center",
+        "justifyContent": "center",
+        "flex": 1
+      },
+      "tabIcon": {
+        "width": 24,
+        "height": 24,
+        "marginBottom": 4
+      },
+      "tabLabel": {
+        "fontSize": 11,
+        "fontWeight": "400",
+        "color": "#9CA3AF"
+      },
+      "activeTab": {
+        "tabIcon": {
+          "tintColor": "#10B981"
+        },
+        "tabLabel": {
+          "color": "#10B981"
+        }
+      },
+      "primaryTab": {
+        "container": {
+          "backgroundColor": "#10B981",
+          "borderRadius": 24,
+          "width": 48,
+          "height": 48,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "marginBottom": 4
+        },
+        "icon": {
+          "width": 24,
+          "height": 24,
+          "tintColor": "#FFFFFF"
+        },
+        "label": {
+          "color": "#10B981"
+        }
+      }
+    },
+    "clickFeedback": {
+      "rectangle": {
+        "width": 80,
+        "height": 60,
+        "backgroundColor": "#FDE3F2",
+        "borderRadius": 25,
+        "position": "absolute",
+        "justifyContent": "center",
+        "alignItems": "center",
+        "shadowColor": "#000000",
+        "shadowOffset": { "width": 0, "height": 2 },
+        "shadowOpacity": 0.1,
+        "shadowRadius": 4,
+        "elevation": 2
+      }
+    }
+  },
+  "animations": {
+    "bottomSheet": {
+      "slideUp": {
+        "type": "spring",
+        "config": {
+          "tension": 300,
+          "friction": 35
+        }
+      }
+    },
+    "mapPin": {
+      "bounce": {
+        "type": "spring",
+        "config": {
+          "tension": 400,
+          "friction": 10
+        }
+      }
+    },
+    "tabPress": {
+      "feedback": {
+        "type": "timing",
+        "duration": 300,
+        "easing": "easeOut"
+      }
+    }
+  },
+  "assets": {
+    "icons": {
+      "navigation": {
+        "home": "assets/tab/Home.svg",
+        "ticket": "assets/tab/Ticket.svg",
+        "qr": "assets/tab/QR.svg",
+        "map": "assets/tab/Map.svg",
+        "account": "assets/tab/Account.svg"
+      },
+      "interface": {
+        "back": "assets/icons/back.svg",
+        "search": "assets/icons/search.svg",
+        "menu": "assets/icons/menu.svg",
+        "warning": "assets/icons/warning.svg",
+        "location": "assets/icons/location.svg"
+      }
+    },
+    "images": {
+      "mapBackground": "assets/images/park-map.png",
+      "rideIcons": "assets/images/rides/",
+      "attractions": "assets/images/attractions/"
+    }
+  },
+  "layout": {
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 12,
+      "lg": 16,
+      "xl": 20,
+      "xxl": 24,
+      "xxxl": 32
+    },
+    "borderRadius": {
+      "sm": 8,
+      "md": 12,
+      "lg": 16,
+      "xl": 20,
+      "xxl": 24,
+      "full": 9999
+    },
+    "shadows": {
+      "sm": {
+        "shadowColor": "#000000",
+        "shadowOffset": { "width": 0, "height": 1 },
+        "shadowOpacity": 0.1,
+        "shadowRadius": 2,
+        "elevation": 1
+      },
+      "md": {
+        "shadowColor": "#000000",
+        "shadowOffset": { "width": 0, "height": 2 },
+        "shadowOpacity": 0.1,
+        "shadowRadius": 4,
+        "elevation": 3
+      },
+      "lg": {
+        "shadowColor": "#000000",
+        "shadowOffset": { "width": 0, "height": 4 },
+        "shadowOpacity": 0.1,
+        "shadowRadius": 8,
+        "elevation": 5
+      }
+    }
+  },
+  "implementation": {
+    "framework": "react-native",
+    "dependencies": [
+      "react-native-maps",
+      "react-native-svg",
+      "react-native-reanimated",
+      "react-native-gesture-handler",
+      "react-native-safe-area-context",
+      "@react-navigation/native",
+      "@react-navigation/bottom-tabs",
+      "react-native-bottom-sheet"
+    ],
+    "stateManagement": "useState/useReducer",
+    "navigation": "@react-navigation/native",
+    "mapLibrary": "react-native-maps",
+    "animations": "react-native-reanimated"
+  },
+  "screens": {
+    "mapScreen": {
+      "name": "Interactive Park Map",
+      "components": [
+        "floating_header",
+        "interactive_map",
+        "location_pins",
+        "bottom_sheet",
+        "location_banner",
+        "bottom_navigation"
+      ],
+      "interactions": [
+        "pinch_to_zoom",
+        "pan_to_navigate",
+        "tap_pin_for_info",
+        "drag_bottom_sheet",
+        "tab_navigation"
+      ]
+    }
+  },
+  "dataStructure": {
+    "rideInfo": {
+      "id": "string",
+      "name": "string",
+      "type": "string",
+      "coordinates": { "latitude": "number", "longitude": "number" },
+      "waitTime": "number",
+      "distance": "string",
+      "icon": "string",
+      "description": "string",
+      "status": "open | closed | maintenance"
+    },
+    "queueData": {
+      "current": "number",
+      "estimated": "number",
+      "fastPass": "number"
+    }
+  }
+}

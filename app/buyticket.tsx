@@ -5,6 +5,7 @@ import {
   Image,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -120,123 +121,135 @@ export default function BuyTicketScreen() {
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.ticketCard,
-          ticket.title === "VÉ TRỌN GÓI" ? { backgroundColor: "#D5EDFF" } : {},
-        ]}
+      <ScrollView
+        style={{ width: "100%" }}
+        contentContainerStyle={{
+          alignItems: "center",
+          paddingBottom: 40,
+          marginTop: 16, // <-- add margin below header
+        }}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.ticketCardTopRow}>
-          <Image
-            source={require("../assets/images/park-name.png")}
-            style={styles.parkNameImage}
-            resizeMode="contain"
-          />
-        </View>
-        <Text style={styles.ticketCardTitle}>{ticket.title}</Text>
-        <View style={styles.priceBlock}>
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Người lớn:</Text>
-            <Text style={styles.priceValue}>{ticket.priceAdult}</Text>
+        <View
+          style={[
+            styles.ticketCard,
+            ticket.title === "VÉ TRỌN GÓI"
+              ? { backgroundColor: "#D5EDFF" }
+              : {},
+          ]}
+        >
+          <View style={styles.ticketCardTopRow}>
+            <Image
+              source={require("../assets/images/park-name.png")}
+              style={styles.parkNameImage}
+              resizeMode="contain"
+            />
           </View>
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Trẻ em {"<"}1,4m:</Text>
-            <Text style={styles.priceValue}>{ticket.priceChild}</Text>
-          </View>
-        </View>
-        <View style={styles.benefitBlock}>
-          {ticket.benefits.map((benefit: string, idx: number) => (
-            <View style={styles.benefitRow} key={idx}>
-              <Feather
-                name="check-circle"
-                size={16}
-                color="#1db954"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.benefitText}>{benefit}</Text>
+          <Text style={styles.ticketCardTitle}>{ticket.title}</Text>
+          <View style={styles.priceBlock}>
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>Người lớn:</Text>
+              <Text style={styles.priceValue}>{ticket.priceAdult}</Text>
             </View>
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>Trẻ em {"<"}1,4m:</Text>
+              <Text style={styles.priceValue}>{ticket.priceChild}</Text>
+            </View>
+          </View>
+          <View style={styles.benefitBlock}>
+            {ticket.benefits.map((benefit: string, idx: number) => (
+              <View style={styles.benefitRow} key={idx}>
+                <Feather
+                  name="check-circle"
+                  size={16}
+                  color="#1db954"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.benefitText}>{benefit}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>LOẠI VÉ</Text>
+          <View style={styles.typeRow}>
+            <TouchableOpacity
+              style={[
+                styles.typeCard,
+                selectedType === "adult" && styles.typeCardSelected,
+              ]}
+              onPress={() => setSelectedType("adult")}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.typeCardText,
+                  selectedType === "adult" && { fontWeight: "bold" },
+                ]}
+              >
+                Người lớn
+              </Text>
+              <Text
+                style={[
+                  styles.typeCardPrice,
+                  selectedType === "adult" && { fontWeight: "bold" },
+                ]}
+              >
+                {ticket.priceAdult}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.typeCard,
+                selectedType === "child" && styles.typeCardSelected,
+              ]}
+              onPress={() => setSelectedType("child")}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.typeCardText,
+                  selectedType === "child" && { fontWeight: "bold" },
+                ]}
+              >
+                Trẻ em {"<"}1,4m
+              </Text>
+              <Text
+                style={[
+                  styles.typeCardPrice,
+                  selectedType === "child" && { fontWeight: "bold" },
+                ]}
+              >
+                {ticket.priceChild}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.freeText}>{ticket.freeText}</Text>
+          {ticket.notes.map((note: string, idx: number) => (
+            <Text style={styles.noteText} key={idx}>
+              {note}
+            </Text>
           ))}
-        </View>
-      </View>
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>LOẠI VÉ</Text>
-        <View style={styles.typeRow}>
-          <TouchableOpacity
-            style={[
-              styles.typeCard,
-              selectedType === "adult" && styles.typeCardSelected,
-            ]}
-            onPress={() => setSelectedType("adult")}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.typeCardText,
-                selectedType === "adult" && { fontWeight: "bold" },
-              ]}
+          <View style={styles.quantityRow}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => setQuantity(Math.max(1, quantity - 1))}
             >
-              Người lớn
-            </Text>
-            <Text
-              style={[
-                styles.typeCardPrice,
-                selectedType === "adult" && { fontWeight: "bold" },
-              ]}
+              <Text style={styles.quantityButtonText}>-</Text>
+            </TouchableOpacity>
+            <Text style={styles.quantityValue}>{quantity}</Text>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => setQuantity(quantity + 1)}
             >
-              {ticket.priceAdult}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.typeCard,
-              selectedType === "child" && styles.typeCardSelected,
-            ]}
-            onPress={() => setSelectedType("child")}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.typeCardText,
-                selectedType === "child" && { fontWeight: "bold" },
-              ]}
-            >
-              Trẻ em {"<"}1,4m
-            </Text>
-            <Text
-              style={[
-                styles.typeCardPrice,
-                selectedType === "child" && { fontWeight: "bold" },
-              ]}
-            >
-              {ticket.priceChild}
-            </Text>
+              <Text style={styles.quantityButtonText}>+</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.orderButton} onPress={handleOrder}>
+            <Text style={styles.orderButtonText}>Đặt vé</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.freeText}>{ticket.freeText}</Text>
-        {ticket.notes.map((note: string, idx: number) => (
-          <Text style={styles.noteText} key={idx}>
-            {note}
-          </Text>
-        ))}
-        <View style={styles.quantityRow}>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => setQuantity(Math.max(1, quantity - 1))}
-          >
-            <Text style={styles.quantityButtonText}>-</Text>
-          </TouchableOpacity>
-          <Text style={styles.quantityValue}>{quantity}</Text>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => setQuantity(quantity + 1)}
-          >
-            <Text style={styles.quantityButtonText}>+</Text>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.orderButton} onPress={handleOrder}>
-          <Text style={styles.orderButtonText}>Đặt vé</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
       {/* Modal xác nhận điều kiện vé trẻ em */}
       <Modal
         visible={showModal}
@@ -314,7 +327,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F9F9F9",
     alignItems: "center",
-    paddingTop: 24,
   },
   ticketCard: {
     backgroundColor: "#FDE3F2",

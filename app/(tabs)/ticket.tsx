@@ -16,7 +16,8 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.8; // 80% chiều rộng màn hình
 const CARD_MARGIN = 16;
 const SNAP_INTERVAL = CARD_WIDTH + CARD_MARGIN;
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.62; // 60% chiều cao màn hình
+const CARD_HEIGHT = Math.min(SCREEN_HEIGHT * 0.62, 480); // Giới hạn tối đa 480px
+const SMALL_SCREEN = SCREEN_HEIGHT < 700;
 
 export default function TicketScreen() {
   const navigation = useNavigation();
@@ -221,93 +222,100 @@ export default function TicketScreen() {
           backgroundColor: ticket.backgroundColor,
           width: CARD_WIDTH,
           height: CARD_HEIGHT,
+          maxHeight: CARD_HEIGHT,
           marginRight: CARD_MARGIN,
         },
       ]}
     >
-      <View style={styles.myTicketHeader}>
-        <Image
-          source={require("../../assets/images/park-name.png")}
-          style={styles.parkNameImage}
-          resizeMode="contain"
-        />
-      </View>
-      <Text style={styles.myTicketTitle}>{ticket.title}</Text>
-      <View style={styles.infoBlock}>
-        <View style={styles.infoRow}>
-          <Feather
-            name="user"
-            size={16}
-            color="#666"
-            style={{ marginRight: 6 }}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 8 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.myTicketHeader}>
+          <Image
+            source={require("../../assets/images/park-name.png")}
+            style={styles.parkNameImage}
+            resizeMode="contain"
           />
-          <Text style={styles.infoLabel}>Sở hữu:</Text>
         </View>
-        <Text style={styles.infoValue}>{ticket.owner}</Text>
-      </View>
-      <View style={styles.infoBlock}>
-        <View style={styles.infoRow}>
-          <Feather
-            name="shield"
-            size={16}
-            color="#666"
-            style={{ marginRight: 6 }}
-          />
-          <Text style={styles.infoLabel}>Quyền lợi:</Text>
-        </View>
-        <Text style={styles.infoValue}>{ticket.benefits}</Text>
-      </View>
-      <View style={styles.infoBlock}>
-        <View style={styles.infoRow}>
-          <Feather
-            name="calendar"
-            size={16}
-            color="#666"
-            style={{ marginRight: 6 }}
-          />
-          <Text style={styles.infoLabel}>Hiệu lực đến:</Text>
-        </View>
-        <Text style={styles.infoValue}>{ticket.validUntil}</Text>
-      </View>
-      <Text style={styles.statusText}>{ticket.status}</Text>
-      <View style={styles.barcodeBox}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "flex-end",
-          }}
-        >
-          {Array.from({ length: 40 }).map((_, i) => (
-            <View
-              key={i}
-              style={{
-                width: Math.random() > 0.5 ? 2 : 1,
-                height: 40,
-                backgroundColor: "#000",
-                marginHorizontal: 0.5,
-              }}
+        <Text style={styles.myTicketTitle}>{ticket.title}</Text>
+        <View style={styles.infoBlock}>
+          <View style={styles.infoRow}>
+            <Feather
+              name="user"
+              size={16}
+              color="#666"
+              style={{ marginRight: 6 }}
             />
-          ))}
+            <Text style={styles.infoLabel}>Sở hữu:</Text>
+          </View>
+          <Text style={styles.infoValue}>{ticket.owner}</Text>
         </View>
-      </View>
-      <View style={styles.orderRow}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Feather
-            name="hash"
-            size={16}
-            color="#666"
-            style={{ marginRight: 6 }}
-          />
-          <Text style={styles.infoLabel}>Đơn #</Text>
+        <View style={styles.infoBlock}>
+          <View style={styles.infoRow}>
+            <Feather
+              name="shield"
+              size={16}
+              color="#666"
+              style={{ marginRight: 6 }}
+            />
+            <Text style={styles.infoLabel}>Quyền lợi:</Text>
+          </View>
+          <Text style={styles.infoValue}>{ticket.benefits}</Text>
         </View>
-        <Text style={styles.infoValue}>{ticket.orderNumber}</Text>
-      </View>
-      <View style={styles.orderRow}>
-        <Text style={styles.infoLabel}>Ngày mua:</Text>
-        <Text style={styles.infoValue}>{ticket.purchaseDate}</Text>
-      </View>
-      <Text style={styles.noteText}>{ticket.note}</Text>
+        <View style={styles.infoBlock}>
+          <View style={styles.infoRow}>
+            <Feather
+              name="calendar"
+              size={16}
+              color="#666"
+              style={{ marginRight: 6 }}
+            />
+            <Text style={styles.infoLabel}>Hiệu lực đến:</Text>
+          </View>
+          <Text style={styles.infoValue}>{ticket.validUntil}</Text>
+        </View>
+        <Text style={styles.statusText}>{ticket.status}</Text>
+        <View style={styles.barcodeBox}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "flex-end",
+            }}
+          >
+            {Array.from({ length: 40 }).map((_, i) => (
+              <View
+                key={i}
+                style={{
+                  width: Math.random() > 0.5 ? 2 : 1,
+                  height: 40,
+                  backgroundColor: "#000",
+                  marginHorizontal: 0.5,
+                }}
+              />
+            ))}
+          </View>
+        </View>
+        <View style={styles.orderRow}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Feather
+              name="hash"
+              size={16}
+              color="#666"
+              style={{ marginRight: 6 }}
+            />
+            <Text style={styles.infoLabel}>Đơn #</Text>
+          </View>
+          <Text style={styles.infoValue}>{ticket.orderNumber}</Text>
+        </View>
+        <View style={styles.orderRow}>
+          <Text style={styles.infoLabel}>Ngày mua:</Text>
+          <Text style={styles.infoValue}>{ticket.purchaseDate}</Text>
+        </View>
+        <Text style={styles.noteText}>{ticket.note}</Text>
+      </ScrollView>
     </View>
   );
 
@@ -437,7 +445,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   ticketCardTitle: {
-    fontSize: 18,
+    fontSize: SMALL_SCREEN ? 16 : 18,
     fontWeight: "700",
     color: "#000",
   },
@@ -450,7 +458,7 @@ const styles = StyleSheet.create({
   buyButtonText: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 14,
+    fontSize: SMALL_SCREEN ? 13 : 14,
   },
   benefitRow: {
     flexDirection: "row",
@@ -465,7 +473,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   benefitText: {
-    fontSize: 14,
+    fontSize: SMALL_SCREEN ? 13 : 14,
     color: "#666",
   },
   infoRow: {
@@ -474,7 +482,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   infoText: {
-    fontSize: 14,
+    fontSize: SMALL_SCREEN ? 13 : 14,
     color: "#666",
   },
   priceRow: {
@@ -484,11 +492,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   priceLabel: {
-    fontSize: 14,
+    fontSize: SMALL_SCREEN ? 13 : 14,
     color: "#666",
   },
   priceValue: {
-    fontSize: 14,
+    fontSize: SMALL_SCREEN ? 13 : 14,
     color: "#000",
     fontWeight: "600",
   },
@@ -504,6 +512,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     // width, height sẽ được set động
+    overflow: "hidden", // Đảm bảo không tràn ra ngoài
   },
   myTicketHeader: {
     flexDirection: "row",
@@ -531,7 +540,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   myTicketTitle: {
-    fontSize: 20,
+    fontSize: SMALL_SCREEN ? 18 : 20,
     fontWeight: "700",
     color: "#000",
     textAlign: "center",
@@ -541,12 +550,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   infoLabel: {
-    fontSize: 14,
+    fontSize: SMALL_SCREEN ? 13 : 14,
     color: "#666",
     fontWeight: "600",
   },
   infoValue: {
-    fontSize: 14,
+    fontSize: SMALL_SCREEN ? 13 : 14,
     color: "#222",
     marginLeft: 24,
     marginBottom: 2,
@@ -556,7 +565,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
     marginBottom: 12,
-    fontSize: 14,
+    fontSize: SMALL_SCREEN ? 13 : 14,
     borderTopWidth: 2,
     borderColor: "#FFF",
     paddingTop: 8,
@@ -575,7 +584,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   noteText: {
-    fontSize: 12,
+    fontSize: SMALL_SCREEN ? 11 : 12,
     color: "#666",
     textAlign: "center",
     // bỏ borderTop ở note

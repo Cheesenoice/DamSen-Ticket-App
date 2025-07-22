@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { memo, useRef, useState } from "react";
+import React, { memo, MutableRefObject, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -87,6 +87,8 @@ const HOTSPOTS: HotspotType[] = [
 const CURRENT_LOCATION = { id: "me", x: 460, y: 450 };
 const FERRIS_LOCATION = { x: 640, y: 310 };
 
+const isWeb = Platform.OS === "web";
+
 // --- Reusable Components ---
 
 // Hotspot Dot on Map
@@ -136,8 +138,7 @@ const RoutePath: React.FC<{ show: boolean }> = ({ show }) =>
     </Svg>
   ) : null;
 
-// Map Image with Hotspots, CurrentLocation, Route
-const MapImage: React.FC<{
+interface MapImageProps {
   scale: any;
   translateX: any;
   translateY: any;
@@ -147,7 +148,111 @@ const MapImage: React.FC<{
   pinchRef: any;
   onHotspotPress: (h: HotspotType) => void;
   showRoute: boolean;
-}> = memo(
+}
+
+interface WebState {
+  dragging: boolean;
+  lastX: number;
+  lastY: number;
+  lastTranslateX: number;
+  lastTranslateY: number;
+  pinch: boolean;
+  lastDist: number;
+  lastScale: number;
+}
+
+// Custom hook: useWebPanZoom
+function useWebPanZoom(
+  containerRef: MutableRefObject<HTMLDivElement | null>,
+  scale: any,
+  translateX: any,
+  translateY: any
+) {
+  React.useEffect(() => {
+    if (!isWeb || !containerRef.current) return;
+    const el = containerRef.current;
+    let pointerIds: number[] = [];
+    let pointers: { [id: number]: { x: number; y: number } } = {};
+    let panStart = { x: 0, y: 0, tx: 0, ty: 0 };
+    let pinchStart = { dist: 0, scale: 1 };
+
+    const getDistance = (
+      a: { x: number; y: number },
+      b: { x: number; y: number }
+    ) => {
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      el.setPointerCapture(e.pointerId);
+      pointerIds.push(e.pointerId);
+      pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if (e.pointerType === "mouse" || pointerIds.length === 1) {
+        // Pan start
+        panStart = {
+          x: e.clientX,
+          y: e.clientY,
+          tx: translateX.value,
+          ty: translateY.value,
+        };
+      } else if (pointerIds.length === 2) {
+        // Pinch start
+        const [id1, id2] = pointerIds;
+        const dist = getDistance(pointers[id1], pointers[id2]);
+        pinchStart = { dist, scale: scale.value };
+      }
+    };
+    const onPointerMove = (e: PointerEvent) => {
+      if (!pointerIds.includes(e.pointerId)) return;
+      pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if (
+        e.pointerType === "mouse" &&
+        pointerIds.length === 1 &&
+        e.buttons === 1
+      ) {
+        // Pan with mouse
+        const dx = e.clientX - panStart.x;
+        const dy = e.clientY - panStart.y;
+        translateX.value = panStart.tx + dx;
+        translateY.value = panStart.ty + dy;
+      } else if (e.pointerType === "touch") {
+        if (pointerIds.length === 1) {
+          // Pan with 1 finger
+          const dx = e.clientX - panStart.x;
+          const dy = e.clientY - panStart.y;
+          translateX.value = panStart.tx + dx;
+          translateY.value = panStart.ty + dy;
+        } else if (pointerIds.length === 2) {
+          // Pinch with 2 fingers
+          const [id1, id2] = pointerIds;
+          const dist = getDistance(pointers[id1], pointers[id2]);
+          let newScale = pinchStart.scale * (dist / pinchStart.dist);
+          newScale = Math.max(0.5, Math.min(2.5, newScale));
+          scale.value = newScale;
+        }
+      }
+    };
+    const onPointerUp = (e: PointerEvent) => {
+      el.releasePointerCapture(e.pointerId);
+      pointerIds = pointerIds.filter((id) => id !== e.pointerId);
+      delete pointers[e.pointerId];
+    };
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerup", onPointerUp);
+    el.addEventListener("pointercancel", onPointerUp);
+    return () => {
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerup", onPointerUp);
+      el.removeEventListener("pointercancel", onPointerUp);
+    };
+  }, [scale, translateX, translateY]);
+}
+
+const MapImage: React.FC<MapImageProps> = memo(
   ({
     scale,
     translateX,
@@ -158,7 +263,104 @@ const MapImage: React.FC<{
     pinchRef,
     onHotspotPress,
     showRoute,
-  }) => {
+  }: MapImageProps) => {
+    // --- Web state ---
+    const [webState, setWebState] = React.useState<WebState>({
+      dragging: false,
+      lastX: 0,
+      lastY: 0,
+      lastTranslateX: 0,
+      lastTranslateY: 0,
+      pinch: false,
+      lastDist: 0,
+      lastScale: 1,
+    });
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    // Web pointer handlers
+    React.useEffect(() => {
+      if (!isWeb || !containerRef.current) return;
+      const el = containerRef.current;
+      let pointerIds: number[] = [];
+      let pointers: { [id: number]: { x: number; y: number } } = {};
+      let panStart = { x: 0, y: 0, tx: 0, ty: 0 };
+      let pinchStart = { dist: 0, scale: 1 };
+
+      const getDistance = (
+        a: { x: number; y: number },
+        b: { x: number; y: number }
+      ) => {
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      };
+
+      const onPointerDown = (e: PointerEvent) => {
+        el.setPointerCapture(e.pointerId);
+        pointerIds.push(e.pointerId);
+        pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+        if (e.pointerType === "mouse" || pointerIds.length === 1) {
+          // Pan start
+          panStart = {
+            x: e.clientX,
+            y: e.clientY,
+            tx: translateX.value,
+            ty: translateY.value,
+          };
+        } else if (pointerIds.length === 2) {
+          // Pinch start
+          const [id1, id2] = pointerIds;
+          const dist = getDistance(pointers[id1], pointers[id2]);
+          pinchStart = { dist, scale: scale.value };
+        }
+      };
+      const onPointerMove = (e: PointerEvent) => {
+        if (!pointerIds.includes(e.pointerId)) return;
+        pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+        if (
+          e.pointerType === "mouse" &&
+          pointerIds.length === 1 &&
+          e.buttons === 1
+        ) {
+          // Pan with mouse
+          const dx = e.clientX - panStart.x;
+          const dy = e.clientY - panStart.y;
+          translateX.value = panStart.tx + dx;
+          translateY.value = panStart.ty + dy;
+        } else if (e.pointerType === "touch") {
+          if (pointerIds.length === 1) {
+            // Pan with 1 finger
+            const dx = e.clientX - panStart.x;
+            const dy = e.clientY - panStart.y;
+            translateX.value = panStart.tx + dx;
+            translateY.value = panStart.ty + dy;
+          } else if (pointerIds.length === 2) {
+            // Pinch with 2 fingers
+            const [id1, id2] = pointerIds;
+            const dist = getDistance(pointers[id1], pointers[id2]);
+            let newScale = pinchStart.scale * (dist / pinchStart.dist);
+            newScale = Math.max(0.5, Math.min(2.5, newScale));
+            scale.value = newScale;
+          }
+        }
+      };
+      const onPointerUp = (e: PointerEvent) => {
+        el.releasePointerCapture(e.pointerId);
+        pointerIds = pointerIds.filter((id) => id !== e.pointerId);
+        delete pointers[e.pointerId];
+      };
+      el.addEventListener("pointerdown", onPointerDown);
+      el.addEventListener("pointermove", onPointerMove);
+      el.addEventListener("pointerup", onPointerUp);
+      el.addEventListener("pointercancel", onPointerUp);
+      return () => {
+        el.removeEventListener("pointerdown", onPointerDown);
+        el.removeEventListener("pointermove", onPointerMove);
+        el.removeEventListener("pointerup", onPointerUp);
+        el.removeEventListener("pointercancel", onPointerUp);
+      };
+    }, [scale, translateX, translateY]);
+
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [
         { translateX: translateX.value },
@@ -166,6 +368,43 @@ const MapImage: React.FC<{
         { scale: scale.value },
       ],
     }));
+
+    if (isWeb) {
+      useWebPanZoom(containerRef, scale, translateX, translateY);
+      return (
+        <div
+          ref={containerRef}
+          style={{
+            width: MAP_WIDTH,
+            height: MAP_HEIGHT,
+            touchAction: "none",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <Animated.View
+            style={[{ width: MAP_WIDTH, height: MAP_HEIGHT }, animatedStyle]}
+          >
+            <Image
+              source={require("../../assets/images/damsen-map.webp")}
+              style={styles.mapImage}
+              resizeMode="cover"
+            />
+            <RoutePath show={showRoute} />
+            <CurrentLocation x={CURRENT_LOCATION.x} y={CURRENT_LOCATION.y} />
+            {HOTSPOTS.map((h) => (
+              <Hotspot
+                key={h.id}
+                x={h.x}
+                y={h.y}
+                onPress={() => onHotspotPress(h)}
+              />
+            ))}
+          </Animated.View>
+        </div>
+      );
+    }
+    // Mobile: giữ nguyên gesture handler
     return (
       <PinchGestureHandler
         ref={pinchRef}
@@ -179,7 +418,10 @@ const MapImage: React.FC<{
             simultaneousHandlers={pinchRef}
           >
             <Animated.View
-              style={[{ width: MAP_WIDTH, height: MAP_HEIGHT }, animatedStyle]}
+              style={[
+                { width: MAP_WIDTH, height: MAP_HEIGHT, touchAction: "none" },
+                animatedStyle,
+              ]}
             >
               <Image
                 source={require("../../assets/images/damsen-map.webp")}
@@ -492,6 +734,61 @@ export default function MapScreen() {
     router.push({ pathname: "/chatbot", params: { preset } });
   };
 
+  // --- Web touch gesture state ---
+  const webTouchState = useRef({
+    lastTouches: null as TouchList | null,
+    lastDistance: 0,
+    lastScale: 1,
+    lastTranslate: { x: 0, y: 0 },
+    startTranslate: { x: 0, y: 0 },
+  });
+
+  // --- Web touch handlers ---
+  const handleTouchStart = (e: TouchEvent) => {
+    if (!isWeb) return;
+    const touches = e.touches;
+    webTouchState.current.lastTouches = touches;
+    if (touches.length === 2) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      webTouchState.current.lastDistance = Math.sqrt(dx * dx + dy * dy);
+      webTouchState.current.lastScale = scale.value;
+    } else if (touches.length === 1) {
+      webTouchState.current.startTranslate = {
+        x: touches[0].clientX - translateX.value,
+        y: touches[0].clientY - translateY.value,
+      };
+    }
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isWeb) return;
+    const touches = e.touches;
+    if (touches.length === 2) {
+      // Pinch zoom
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const scaleFactor = distance / webTouchState.current.lastDistance;
+      let newScale = webTouchState.current.lastScale * scaleFactor;
+      newScale = Math.max(0.5, Math.min(2.5, newScale));
+      scale.value = newScale;
+    } else if (touches.length === 1) {
+      // Pan
+      const x = touches[0].clientX - webTouchState.current.startTranslate.x;
+      const y = touches[0].clientY - webTouchState.current.startTranslate.y;
+      translateX.value = x;
+      translateY.value = y;
+    }
+    e.preventDefault();
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (!isWeb) return;
+    // Reset state if needed
+    webTouchState.current.lastTouches = null;
+  };
+
   return (
     <View style={styles.container}>
       {/* Fixed warning button */}
@@ -526,6 +823,17 @@ export default function MapScreen() {
         pinchRef={pinchRef}
         onHotspotPress={openHotspot}
         showRoute={showRoute}
+        {...(isWeb
+          ? {
+              ref: (ref: HTMLDivElement | null) => {
+                if (ref) {
+                  ref.ontouchstart = handleTouchStart;
+                  ref.ontouchmove = handleTouchMove;
+                  ref.ontouchend = handleTouchEnd;
+                }
+              },
+            }
+          : {})}
       />
       {/* Floating header */}
       <SafeAreaView style={styles.headerContainer}>

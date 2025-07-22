@@ -81,89 +81,98 @@ export default function ExploreScreen() {
   return (
     <View style={styles.screen}>
       {/* Filter Chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterBar}
-        style={{ backgroundColor: "#fff" }}
-      >
-        {FILTERS.map((item, idx) => {
-          const isSelected = selected === idx;
-          return (
-            <TouchableOpacity
-              key={item}
-              style={[styles.chip, isSelected && styles.chipSelected]}
-              onPress={() => setSelected(idx)}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[styles.chipText, isSelected && styles.chipTextSelected]}
+      <View style={{ height: 64, backgroundColor: "#fff" }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterBar}
+        >
+          {FILTERS.map((item, idx) => {
+            const isSelected = selected === idx;
+            return (
+              <TouchableOpacity
+                key={item}
+                style={[styles.chip, isSelected && styles.chipSelected]}
+                onPress={() => setSelected(idx)}
+                activeOpacity={0.7}
               >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+                <Text
+                  style={[
+                    styles.chipText,
+                    isSelected && styles.chipTextSelected,
+                  ]}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {/* Card List */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.cardGrid}
-      >
-        {CARDS.map((card, idx) => (
-          <View key={card.id} style={styles.card}>
-            <View style={styles.imageContainer}>
-              <Image
-                source={card.image}
-                style={styles.image}
-                resizeMode="cover"
-              />
-              {/* Badge category và time cùng hàng góc trái dưới */}
-              <View style={styles.badgeBottomRow}>
-                <View style={[styles.badge, styles.badgeCategory]}>
-                  <Text style={styles.badgeCategoryText}>
-                    {FILTERS[card.categoryIndex]}
-                  </Text>
-                </View>
-                <View style={[styles.badge, styles.badgeTime]}>
-                  <Text style={styles.badgeText}>{card.time}</Text>
-                </View>
-              </View>
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{card.title}</Text>
-              <Text style={styles.cardDescription}>{card.description}</Text>
-              <View style={styles.cardFooter}>
-                <View style={styles.badgeRow}>
-                  <View style={[styles.badge, styles.badgeDistance]}>
-                    <Text style={styles.badgeText}>{card.distance}</Text>
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.cardGrid}
+          style={{ flex: 1 }}
+        >
+          {CARDS.map((card, idx) => (
+            <View key={card.id} style={styles.card}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={card.image}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+                {/* Badge category và time cùng hàng góc trái dưới */}
+                <View style={styles.badgeBottomRow}>
+                  <View style={[styles.badge, styles.badgeCategory]}>
+                    <Text style={styles.badgeCategoryText}>
+                      {FILTERS[card.categoryIndex]}
+                    </Text>
+                  </View>
+                  <View style={[styles.badge, styles.badgeTime]}>
+                    <Text style={styles.badgeText}>{card.time}</Text>
                   </View>
                 </View>
-                <View style={styles.buttonColumn}>
-                  <TouchableOpacity style={styles.button} activeOpacity={0.8}>
-                    <Text style={styles.buttonText}>Xem chi tiết</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.button, styles.buttonDirection]}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.buttonDirectionContent}>
-                      <Ionicons
-                        name="navigate"
-                        size={16}
-                        color="#333"
-                        style={{ marginRight: 6 }}
-                      />
-                      <Text style={styles.buttonDirectionText}>Chỉ đường</Text>
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{card.title}</Text>
+                <Text style={styles.cardDescription}>{card.description}</Text>
+                <View style={styles.cardFooter}>
+                  <View style={styles.badgeRow}>
+                    <View style={[styles.badge, styles.badgeDistance]}>
+                      <Text style={styles.badgeText}>{card.distance}</Text>
                     </View>
-                  </TouchableOpacity>
+                  </View>
+                  <View style={styles.buttonColumn}>
+                    <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+                      <Text style={styles.buttonText}>Xem chi tiết</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.button, styles.buttonDirection]}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.buttonDirectionContent}>
+                        <Ionicons
+                          name="navigate"
+                          size={16}
+                          color="#333"
+                          style={{ marginRight: 6 }}
+                        />
+                        <Text style={styles.buttonDirectionText}>
+                          Chỉ đường
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        ))}
-      </ScrollView>
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -188,7 +197,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 25,
     backgroundColor: "#fff", // chip màu trắng
-    marginRight: 12,
     minHeight: 40,
     justifyContent: "center",
     alignItems: "center",

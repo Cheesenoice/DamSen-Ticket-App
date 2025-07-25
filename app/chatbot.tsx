@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useLayoutEffect, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -31,61 +31,11 @@ export default function ChatbotScreen() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList<any>>(null);
-  const navigation = useNavigation();
   const { preset } = useLocalSearchParams();
   const [presetSent, setPresetSent] = useState(false);
-  const [isEmergency, setIsEmergency] = useState(false); // NEW
-  const [emergencyDots, setEmergencyDots] = useState(""); // NEW
-  const emergencyInterval = useRef<ReturnType<typeof setInterval> | null>(null); // FIXED TYPE
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: "Trợ lý ảo",
-
-      headerLeft: () => (
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingRight: 40,
-            paddingLeft: 0,
-            marginLeft: 0,
-          }}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={22} color="#FF69B4" />
-          <Text
-            style={{
-              color: "#FF69B4",
-              fontSize: 16,
-              fontWeight: "500",
-              marginLeft: 4,
-            }}
-          >
-            Quay về
-          </Text>
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <View
-          style={{ flexDirection: "row", alignItems: "center", marginRight: 8 }}
-        >
-          <View
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: "#00C851",
-              marginRight: 6,
-            }}
-          />
-          <Text style={{ color: "#00C851", fontSize: 14, fontWeight: "500" }}>
-            Online
-          </Text>
-        </View>
-      ),
-    });
-  }, [navigation]);
+  const [isEmergency, setIsEmergency] = useState(false);
+  const [emergencyDots, setEmergencyDots] = useState("");
+  const emergencyInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Gửi tin nhắn tự động nếu có preset
   React.useEffect(() => {
@@ -304,9 +254,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   avatarLogo: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   messageBubble: {
     padding: 12,

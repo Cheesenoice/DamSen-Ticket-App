@@ -1,6 +1,6 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useLayoutEffect, useState } from "react";
+import { Feather } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
 import {
   Image,
   Modal,
@@ -60,36 +60,6 @@ const TICKET_DATA: Record<
 
 export default function BuyTicketScreen() {
   const params = useLocalSearchParams();
-  const navigation = useNavigation();
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: "Mua vé",
-      headerLeft: () => (
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingRight: 40,
-            paddingLeft: 0,
-            marginLeft: 0,
-          }}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={22} color="#FF69B4" />
-          <Text
-            style={{
-              color: "#FF69B4",
-              fontSize: 16,
-              fontWeight: "500",
-              marginLeft: 4,
-            }}
-          >
-            Quay về
-          </Text>
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
   const ticketType =
     typeof params.type === "string" && TICKET_DATA[params.type]
       ? params.type

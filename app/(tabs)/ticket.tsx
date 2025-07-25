@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Dimensions,
   Image,
@@ -20,49 +19,10 @@ const CARD_HEIGHT = Math.min(SCREEN_HEIGHT * 0.62, 480); // Giới hạn tối �
 const SMALL_SCREEN = SCREEN_HEIGHT < 700;
 
 export default function TicketScreen() {
-  const navigation = useNavigation();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"purchase" | "mytickets">(
     "purchase"
   );
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <View style={{ paddingLeft: 12 }}>
-          <Text style={{ fontSize: 22, fontWeight: "bold", color: "#000" }}>
-            Vé
-          </Text>
-        </View>
-      ),
-      headerRight: () => (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingRight: 12,
-          }}
-        >
-          <Feather
-            name="bell"
-            size={22}
-            color="#000"
-            style={{ marginRight: 12 }}
-          />
-          <View
-            style={{
-              width: 28,
-              height: 28,
-              backgroundColor: "#bbb",
-              borderRadius: 14,
-            }}
-          />
-        </View>
-      ),
-      headerStyle: { backgroundColor: "#fff" },
-      headerTitle: "",
-    });
-  }, [navigation]);
 
   const purchaseTickets = [
     {

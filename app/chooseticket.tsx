@@ -1,7 +1,6 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { useRouter } from "expo-router"; // thêm dòng này
-import React, { useLayoutEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
   Dimensions,
   Image,
@@ -20,50 +19,10 @@ const SMALL_SCREEN = SCREEN_HEIGHT < 700;
 const CARD_HEIGHT = Math.min(SCREEN_HEIGHT * 0.62, 480); // Giới hạn tối đa 480px
 
 export default function ChooseTicketScreen() {
-  const navigation = useNavigation();
-  const router = useRouter(); // thêm dòng này
+  const router = useRouter();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [activated, setActivated] = useState(false);
-
-  useLayoutEffect(() => {
-    navigation.setOptions &&
-      navigation.setOptions({
-        headerTitle: () => (
-          <View style={{ paddingLeft: 12 }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", color: "#000" }}>
-              Chọn vé
-            </Text>
-          </View>
-        ),
-        headerRight: () => null,
-        headerStyle: { backgroundColor: "#fff" },
-        headerLeft: () => (
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingRight: 40,
-              paddingLeft: 0,
-              marginLeft: 0,
-            }}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={22} color="#FF69B4" />
-            <Text
-              style={{
-                color: "#FF69B4",
-                fontSize: 16,
-                fontWeight: "500",
-                marginLeft: 4,
-              }}
-            >
-              Quay về
-            </Text>
-          </TouchableOpacity>
-        ),
-      });
-  }, [navigation]);
 
   const myTickets = [
     {

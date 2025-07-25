@@ -1,6 +1,5 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import React, { useLayoutEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import {
   Image,
   ScrollView,
@@ -12,66 +11,6 @@ import {
 } from "react-native";
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerStyle: {
-        height: 120, // Tăng chiều cao header
-        backgroundColor: "#D1FBD0", // Thêm màu nền xanh lá
-      },
-      headerLeft: () => (
-        <View
-          style={{
-            flexDirection: "column",
-            alignItems: "flex-start",
-            paddingLeft: 12,
-          }}
-        >
-          <Text style={{ fontSize: 22, fontWeight: "bold", color: "#000" }}>
-            Chào mừng
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: "#d63384",
-              fontWeight: "600",
-              marginTop: 2,
-              marginBottom: 8,
-            }}
-          >
-            Đầm sen Park
-          </Text>
-        </View>
-      ),
-      headerRight: () => (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingRight: 12,
-          }}
-        >
-          <Feather
-            name="bell"
-            size={22}
-            color="#000"
-            style={{ marginRight: 12 }}
-          />
-          <View
-            style={{
-              width: 28,
-              height: 28,
-              backgroundColor: "#bbb",
-              borderRadius: 14,
-            }}
-          />
-        </View>
-      ),
-      headerTitle: "",
-    });
-  }, [navigation]);
-
   return (
     <View style={styles.container}>
       <ScrollView

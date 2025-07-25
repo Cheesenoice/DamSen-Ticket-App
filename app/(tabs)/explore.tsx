@@ -1,6 +1,5 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import React, { useLayoutEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
 import {
   Image,
   ScrollView,
@@ -37,46 +36,6 @@ const CARDS = [
 
 export default function ExploreScreen() {
   const [selected, setSelected] = useState(0);
-  const navigation = useNavigation();
-
-  useLayoutEffect(() => {
-    navigation.setOptions &&
-      navigation.setOptions({
-        headerStyle: { backgroundColor: "#fff" },
-        headerLeft: () => (
-          <View style={{ paddingLeft: 12 }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", color: "#000" }}>
-              Khám phá
-            </Text>
-          </View>
-        ),
-        headerRight: () => (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingRight: 12,
-            }}
-          >
-            <Feather
-              name="bell"
-              size={22}
-              color="#000"
-              style={{ marginRight: 12 }}
-            />
-            <View
-              style={{
-                width: 28,
-                height: 28,
-                backgroundColor: "#bbb",
-                borderRadius: 14,
-              }}
-            />
-          </View>
-        ),
-        headerTitle: () => null,
-      });
-  }, [navigation]);
 
   return (
     <View style={styles.screen}>

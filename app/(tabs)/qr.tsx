@@ -1,57 +1,19 @@
-import { Feather } from "@expo/vector-icons";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import {
   BarcodeScanningResult,
   CameraView,
   useCameraPermissions,
 } from "expo-camera";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useRouter } from "expo-router";
+import { useEffect, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function QRScreen() {
+  const router = useRouter();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [permission, requestPermission] = useCameraPermissions();
   const hasNavigated = useRef(false);
-
-  useLayoutEffect(() => {
-    navigation.setOptions &&
-      navigation.setOptions({
-        headerStyle: { backgroundColor: "#fff" },
-        headerLeft: () => (
-          <View style={{ paddingLeft: 12 }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", color: "#000" }}>
-              Quét mã QR
-            </Text>
-          </View>
-        ),
-        headerRight: () => (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingRight: 12,
-            }}
-          >
-            <Feather
-              name="bell"
-              size={22}
-              color="#000"
-              style={{ marginRight: 12 }}
-            />
-            <View
-              style={{
-                width: 28,
-                height: 28,
-                backgroundColor: "#bbb",
-                borderRadius: 14,
-              }}
-            />
-          </View>
-        ),
-        headerTitle: () => null,
-      });
-  }, [navigation]);
 
   useEffect(() => {
     if (!permission) return;

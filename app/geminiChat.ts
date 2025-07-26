@@ -13,6 +13,22 @@ export type GeminiChatResult = {
   error?: string;
 };
 
+interface GeminiApiContentPart {
+  text: string;
+}
+
+interface GeminiApiContent {
+  parts: GeminiApiContentPart[];
+}
+
+interface GeminiApiCandidate {
+  content: GeminiApiContent;
+}
+
+interface GeminiApiResponse {
+  candidates?: GeminiApiCandidate[];
+}
+
 export async function chatWithGemini(
   message: string
 ): Promise<GeminiChatResult> {
@@ -214,7 +230,7 @@ export async function chatWithGemini(
   };
 
   try {
-    const response = await fetch(GEMINI_API_URL, {
+    const response: Response = await fetch(GEMINI_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -228,9 +244,9 @@ export async function chatWithGemini(
         error: `api_error_${response.status}`,
       };
     }
-    const data = await response.json();
+    const data: GeminiApiResponse = await response.json();
     // Extract text from Gemini API response
-    let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    let rawText: string | undefined = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!rawText) {
       return {
         reply: "Không nhận được phản hồi từ AI.",
@@ -248,9 +264,9 @@ export async function chatWithGemini(
       rawText = rawText.replace(/```/g, "").trim();
     }
     // Parse JSON
-    let parsedResponse;
+    let parsedResponse: GeminiChatResult;
     try {
-      parsedResponse = JSON.parse(rawText);
+      parsedResponse = JSON.parse(rawText) as GeminiChatResult;
     } catch (err) {
       return {
         reply: "Phản hồi từ AI không hợp lệ (lỗi JSON)",
@@ -269,16 +285,16 @@ export async function chatWithGemini(
       };
     }
     // Format reply (replace \n with real newlines)
-    const formattedReply = parsedResponse.reply.replace(/\\n/g, "\n");
+    const formattedReply: string = parsedResponse.reply.replace(/\\n/g, "\n");
     return {
       reply: formattedReply,
       isEmergency: parsedResponse.isEmergency,
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       reply: "Có lỗi xảy ra khi xử lý AI.",
       isEmergency: false,
-      error: error.message || "unknown_error",
+      error: (error as Error)?.message || "unknown_error",
     };
   }
 }

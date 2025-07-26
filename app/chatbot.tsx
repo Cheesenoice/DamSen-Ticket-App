@@ -297,6 +297,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
     paddingVertical: 0,
+    borderWidth: 0,
+    outlineWidth: 0,
+    borderColor: 'transparent',
+    outlineColor: 'transparent',
+    backgroundColor: 'transparent',
   },
   sendButton: {
     width: 32,

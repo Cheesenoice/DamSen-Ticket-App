@@ -122,6 +122,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#999",
     flex: 1,
+    borderWidth: 0,
+    outlineWidth: 0,
+    borderColor: 'transparent',
+    outlineColor: 'transparent',
+    backgroundColor: 'transparent',
   },
   actionCardsContainer: {
     flexDirection: "row",

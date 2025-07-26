@@ -299,9 +299,9 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     borderWidth: 0,
     outlineWidth: 0,
-    borderColor: 'transparent',
-    outlineColor: 'transparent',
-    backgroundColor: 'transparent',
+    borderColor: "transparent",
+    outlineColor: "transparent",
+    backgroundColor: "transparent",
   },
   sendButton: {
     width: 32,

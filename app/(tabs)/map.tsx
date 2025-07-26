@@ -6,7 +6,6 @@ import {
   Image,
   Platform,
   View as RNView,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -1387,7 +1386,7 @@ const MapScreen: React.FC = () => {
           : {})}
       />
       {/* Floating header */}
-      <SafeAreaView style={styles.headerContainer}>
+      {/* <SafeAreaView style={styles.headerContainer}>
         <View style={styles.headerRow}>
           <TouchableOpacity
             style={[
@@ -1407,7 +1406,7 @@ const MapScreen: React.FC = () => {
             <Ionicons name="search" size={24} color="#424242" />
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </SafeAreaView> */}
       {/* Bottom sheet shows hotspot info if selected or navigation mode */}
       <BottomSheet
         visible={!!selectedHotspot || navigationMode}

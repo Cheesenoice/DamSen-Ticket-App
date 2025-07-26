@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
     elevation: 6,
     maxWidth: 320,
     width: "90%",
+    marginBottom: 60,
     padding: 0,
     position: "relative", // thêm dòng này
   },

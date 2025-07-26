@@ -246,6 +246,22 @@ export default function RootLayout() {
           }}
         />
 
+        {/* Explore Detail Screen */}
+        <Stack.Screen
+          name="exploreDetail"
+          options={{
+            header: () => (
+              <CustomHeader
+                left={<HeaderLeft onPress={() => router.back()} />}
+                title={<HeaderTitle title="Chi tiết" />}
+              />
+            ),
+            headerStyle: { backgroundColor: "#fff" },
+            headerShadowVisible: true,
+            headerLeft: () => <HeaderLeft onPress={() => router.back()} />,
+          }}
+        />
+
         {/* Account Screen */}
         <Stack.Screen
           name="account"

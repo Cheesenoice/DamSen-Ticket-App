@@ -246,7 +246,8 @@ export async function chatWithGemini(
     }
     const data: GeminiApiResponse = await response.json();
     // Extract text from Gemini API response
-    let rawText: string | undefined = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    let rawText: string | undefined =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!rawText) {
       return {
         reply: "Không nhận được phản hồi từ AI.",

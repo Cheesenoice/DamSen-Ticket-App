@@ -48,6 +48,42 @@ const notifications = [
     icon: "information-circle-outline",
     color: "#4FC3F7",
   },
+  {
+    id: 5,
+    title: "Thông báo bảo trì hệ thống",
+    description: "Ứng dụng sẽ bảo trì từ 23:00 ngày 28/07 đến 02:00 ngày 29/07.",
+    time: "Hôm nay, 14:00",
+    type: "maintenance",
+    icon: "construct-outline",
+    color: "#FFA726",
+  },
+  {
+    id: 6,
+    title: "Sự kiện: Đêm nhạc ngoài trời",
+    description: "Tham gia đêm nhạc miễn phí vào tối thứ 7 tại quảng trường trung tâm.",
+    time: "2 ngày trước",
+    type: "event",
+    icon: "musical-notes-outline",
+    color: "#AB47BC",
+  },
+  {
+    id: 7,
+    title: "Nhắc nhở: Đánh giá trải nghiệm",
+    description: "Hãy để lại đánh giá sau khi tham quan để nhận quà tặng hấp dẫn!",
+    time: "3 ngày trước",
+    type: "reminder",
+    icon: "star-outline",
+    color: "#FFD600",
+  },
+  {
+    id: 8,
+    title: "Thông tin: Khu vực mới mở cửa",
+    description: "Khu Thủy Cung đã mở cửa trở lại, mời bạn ghé thăm!",
+    time: "4 ngày trước",
+    type: "info",
+    icon: "fish-outline",
+    color: "#29B6F6",
+  },
 ];
 
 const NotificationScreen = () => {
@@ -66,15 +102,13 @@ const NotificationScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F9F9F9" }}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <FlatList
-          data={notifications}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ paddingBottom: 24 }}
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
+      <FlatList
+        data={notifications}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={true}
+      />
     </SafeAreaView>
   );
 };

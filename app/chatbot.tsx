@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { chatWithGemini } from "./geminiChat";
 // import logoDamSen from "../assets/images/logo-dam-sen.png";
 const logoDamSen = require("../assets/images/logo-dam-sen.png");
 
@@ -64,18 +65,14 @@ export default function ChatbotScreen() {
     setInput("");
     setLoading(true);
     try {
-      const res = await fetch("https://5b53a8c8a60a.ngrok-free.app/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg.text }),
-      });
-      const data = await res.json();
+      // Gọi Gemini trực tiếp bằng hàm client-side
+      const data = await chatWithGemini(userMsg.text);
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now().toString() + "-reply",
+          id: Date.now().toString() + "-ai",
           type: "incoming",
-          text: data.reply || data.message || "(No reply)",
+          text: data.reply,
           timestamp: new Date().toISOString(),
         },
       ]);

@@ -40,7 +40,7 @@ const SupportChat = () => {
         <View style={styles.bubbleWrapper}>
           <Animated.View style={[styles.chatBubble, { opacity: fadeAnim }]}>
             <View style={styles.bubbleContent}>
-              <Text style={styles.bubbleText}>Chat với bé sen</Text>
+              <Text style={styles.bubbleText}>Chat với Bé Sen</Text>
             </View>
           </Animated.View>
           <Animated.View style={[styles.bubbleArrow, { opacity: fadeAnim }]} />

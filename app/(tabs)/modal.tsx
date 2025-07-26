@@ -10,22 +10,13 @@ import {
 
 const CASES = [
   {
-    key: "other",
-    icon: "📞",
-    label: "Hỗ trợ khác",
-    modalTitle: "HỖ TRỢ KHÁC",
-    modalDesc:
-      "Đội ngũ hỗ trợ sẽ liên hệ với bạn trong vòng 5 phút. Vui lòng mô tả tình huống để chúng tôi có thể hỗ trợ tốt nhất.",
-    message: "Tôi cần hỗ trợ khẩn cấp",
-  },
-  {
     key: "child",
     icon: "🧒",
     label: "Trẻ em bị lạc",
     modalTitle: "TRẺ EM BỊ LẠC",
     modalDesc:
       "Chúng tôi sẽ ngay lập tức liên hệ với đội ngũ an ninh và hỗ trợ tìm kiếm trẻ em. Vui lòng giữ bình tĩnh và ở nguyên vị trí.",
-    message: "Tôi bị lạc",
+    message: "Trẻ em bị lạc",
   },
   {
     key: "medical",
@@ -44,6 +35,15 @@ const CASES = [
     modalDesc:
       "Chúng tôi sẽ kiểm tra khu vực xung quanh và liên hệ với phòng đồ thất lạc. Vui lòng cung cấp mô tả chi tiết về vật phẩm bị mất.",
     message: "Tôi bị mất đồ",
+  },
+  {
+    key: "other",
+    icon: "📞",
+    label: "Hỗ trợ khác",
+    modalTitle: "HỖ TRỢ KHÁC",
+    modalDesc:
+      "Đội ngũ hỗ trợ sẽ liên hệ với bạn trong vòng 5 phút. Vui lòng mô tả tình huống để chúng tôi có thể hỗ trợ tốt nhất.",
+    message: "Tôi cần hỗ trợ khẩn cấp",
   },
 ];
 

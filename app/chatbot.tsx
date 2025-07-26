@@ -42,7 +42,7 @@ export default function ChatbotScreen() {
   React.useEffect(() => {
     if (!preset || presetSent) return;
     let text = "";
-    if (preset === "toibilac") text = "Tôi bị lạc";
+    if (preset === "toibilac") text = "Trẻ em bị lạc";
     if (preset === "toibimatdo") text = "Tôi bị mất đồ";
     if (preset === "ho_tro_y_te") text = "Tôi cần hỗ trợ y tế";
     if (preset === "ho_tro_khac") text = "Tôi cần hỗ trợ hỏi đáp";

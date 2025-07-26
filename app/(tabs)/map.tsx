@@ -68,7 +68,7 @@ const HOTSPOTS: HotspotType[] = [
     category: "Khu vực • Check-in",
     avatar: "🏰",
     metrics: { waitTime: "10", distance: "150" },
-    isMaintenanceActive: false,
+    isMaintenanceActive: true,
     description:
       "Một lâu đài tuyệt đẹp giữa công viên. Nơi lý tưởng để chụp ảnh và vui chơi cùng gia đình!",
     x: 230,
@@ -142,7 +142,7 @@ const HOTSPOTS: HotspotType[] = [
     category: "Khám phá • Băng tuyết",
     avatar: "❄️",
     metrics: { waitTime: "15", distance: "100" },
-    isMaintenanceActive: false,
+    isMaintenanceActive: true,
     description:
       "Khám phá thế giới băng giá huyền ảo với các tác phẩm điêu khắc băng tuyệt đẹp!",
     x: 470,
@@ -155,7 +155,7 @@ const HOTSPOTS: HotspotType[] = [
     category: "Thư giãn • Thiên nhiên",
     avatar: "🌵",
     metrics: { waitTime: "0", distance: "120" },
-    isMaintenanceActive: false,
+    isMaintenanceActive: true,
     description: "Không gian xanh mát với các loài xương rồng độc đáo.",
     x: 540,
     y: 565,

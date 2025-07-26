@@ -37,7 +37,7 @@ const GAME_DETAILS = [
     title: "Lâu đài băng đăng",
     description:
       "Khám phá thế giới băng giá với các tác phẩm điêu khắc băng nghệ thuật, không gian lạnh và check-in cực chất.",
-    image: require("../assets/images/logo-dam-sen.png"),
+    image: require("../assets/images/bang-dang.png"),
     wait: 5,
     distance: 80,
     price: "30.000",
@@ -56,7 +56,7 @@ const GAME_DETAILS = [
     title: "Vườn khủng long",
     description:
       "Khám phá thế giới khủng long sống động với nhiều mô hình tương tác và khu check-in độc đáo.",
-    image: require("../assets/images/logo-dam-sen1.png"),
+    image: require("../assets/images/vuon-khung-long.png"),
     wait: 8,
     distance: 300,
     price: "45.000",
@@ -80,6 +80,7 @@ export default function ExploreDetailScreen() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{flexGrow: 1}}
       >
         {/* Main Image */}
         <View style={styles.imageContainer}>
@@ -146,6 +147,9 @@ const styles = StyleSheet.create({
 
   scrollView: {
     flex: 1,
+    padding: 0,
+    margin: 0,
+    backgroundColor: 'transparent',
   },
   imageContainer: {
     height: 250,
@@ -156,11 +160,15 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   content: {
-    padding: 20,
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 0,
     backgroundColor: "#fff",
     marginTop: -20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+
   },
   infoCardsRow: {
     flexDirection: "row",
@@ -220,7 +228,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     gap: 12,
-    paddingBottom: 40,
+    paddingBottom: 24,
   },
   ticketButton: {
     backgroundColor: "#FF69B4",

@@ -39,7 +39,7 @@ const CARDS = [
     title: "Lâu đài băng đăng",
     description:
       "Khám phá thế giới băng giá với các tác phẩm điêu khắc băng nghệ thuật, không gian lạnh và check-in cực chất.",
-    image: require("../../assets/images/logo-dam-sen.png"),
+    image: require("../../assets/images/bang-dang.png"),
     time: "~2 min",
     distance: "Cách 80m",
     categoryIndex: 0, // Mọi thể loại
@@ -49,7 +49,7 @@ const CARDS = [
     title: "Vòng đu quay",
     description:
       "Trải nghiệm cảm giác lơ lửng trên không và ngắm nhìn toàn cảnh công viên từ trên cao.",
-    image: require("../../assets/images/vong-quay-mat-troi.png"),
+    image: require("../../assets/images/vong-du-quay.png"),
     time: "~4 min",
     distance: "Cách 150m",
     categoryIndex: 1, // Hang động
@@ -59,7 +59,7 @@ const CARDS = [
     title: "Vườn khủng long",
     description:
       "Khám phá thế giới khủng long sống động với nhiều mô hình tương tác",
-    image: require("../../assets/images/logo-dam-sen1.png"),
+    image: require("../../assets/images/vuon-khung-long.png"),
     time: "~6 min",
     distance: "Cách 300m",
     categoryIndex: 3, // Phiêu lưu
@@ -138,20 +138,30 @@ export default function ExploreScreen() {
                     </View>
                   </View>
                   <View style={styles.buttonColumn}>
-                    <TouchableOpacity 
-                      style={styles.button} 
+                    <TouchableOpacity
+                      style={styles.button}
                       activeOpacity={0.8}
-                      onPress={() => router.push({ pathname: '/exploreDetail', params: { id: card.id } })}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/exploreDetail",
+                          params: { id: card.id },
+                        })
+                      }
                     >
-                      <Text style={styles.buttonText}>Xem chi tiết</Text>
+                      <Text style={styles.buttonText}>Đặt vé</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.button, styles.buttonDirection]}
                       activeOpacity={0.8}
-                      onPress={() => router.push('/(tabs)/map')}
+                      onPress={() => router.push("/(tabs)/map")}
                     >
                       <View style={styles.buttonDirectionContent}>
-                        <Ionicons name="navigate" size={16} color="#2196F3" style={{ marginRight: 6 }} />
+                        <Ionicons
+                          name="navigate"
+                          size={16}
+                          color="#2196F3"
+                          style={{ marginRight: 6 }}
+                        />
                         <Text style={styles.buttonDirectionText}>
                           Chỉ đường
                         </Text>

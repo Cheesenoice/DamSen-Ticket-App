@@ -9,9 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useRouter } from "expo-router";
 import SupportChat from "../../components/supportchat";
 
 export default function HomeScreen() {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <ScrollView
@@ -44,9 +46,9 @@ export default function HomeScreen() {
               resizeMode="cover"
             />
             <Text style={styles.actionTitle}>Mua vé</Text>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Mua ngay</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/ticket')}>
+  <Text style={styles.actionButtonText}>Mua ngay</Text>
+</TouchableOpacity>
           </View>
           <View style={[styles.actionCard, styles.actionCardPink]}>
             <Image
@@ -55,9 +57,9 @@ export default function HomeScreen() {
               resizeMode="cover"
             />
             <Text style={styles.actionTitle}>Sự kiện</Text>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Khám phá</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/explore')}>
+  <Text style={styles.actionButtonText}>Khám phá</Text>
+</TouchableOpacity>
           </View>
         </View>
 
@@ -67,9 +69,9 @@ export default function HomeScreen() {
           <Text style={styles.sectionDescription}>
             Trải nghiệm hơn 50 trò chơi hấp dẫn ngay tại Đầm sen
           </Text>
-          <TouchableOpacity style={styles.featureButton}>
-            <Text style={styles.featureButtonText}>Xem thêm</Text>
-          </TouchableOpacity>
+          <TouchableOpacity style={styles.featureButton} onPress={() => router.push('/explore')}>
+  <Text style={styles.featureButtonText}>Xem thêm</Text>
+</TouchableOpacity>
         </View>
 
         {/* Family Combo Section */}
@@ -82,9 +84,9 @@ export default function HomeScreen() {
             <Text style={styles.bulletPoint}>• 10 vé vào cửa</Text>
             <Text style={styles.bulletPoint}>• Pepsi lon x 5</Text>
           </View>
-          <TouchableOpacity style={styles.comboButton}>
-            <Text style={styles.comboButtonText}>Xem thêm</Text>
-          </TouchableOpacity>
+          <TouchableOpacity style={styles.comboButton} onPress={() => router.push('/ticket')}>
+  <Text style={styles.comboButtonText}>Xem thêm</Text>
+</TouchableOpacity>
         </View>
       </ScrollView>
       <SupportChat />

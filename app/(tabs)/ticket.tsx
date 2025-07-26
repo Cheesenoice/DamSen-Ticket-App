@@ -28,6 +28,16 @@ export default function TicketScreen() {
   const purchaseTickets = [
     {
       id: 1,
+      title: "CÁC LOẠI VÉ LẺ",
+      benefits: [
+        "Vé Vòng Quay: 30.000đ - 50.000đ / vé",
+        "Riêng Băng Đăng: 70.000đ / vé",
+      ],
+      prices: { from: "30.000 VNĐ", to: "50.000 VNĐ" },
+      backgroundColor: "#FDE3F2",
+    },
+    {
+      id: 2,
       title: "VÉ THAM QUAN",
       benefits: ["Tham quan trong ngày", "Tham quan Đầm Sen"],
       ageLimit: "Từ 7 giá đến 20 giá",
@@ -38,7 +48,7 @@ export default function TicketScreen() {
       backgroundColor: "#FDE3F2",
     },
     {
-      id: 2,
+      id: 3,
       title: "VÉ TRỌN GÓI",
       benefits: ["Tham quan trong ngày", "Bao gồm trò chơi", "Thủy Cung"],
       ageLimit: "Từ 7 giá đến 20 giá",
@@ -47,16 +57,6 @@ export default function TicketScreen() {
       adultAge: "Người lớn:",
       childAge: "Trẻ em <1.4m:",
       backgroundColor: "#D5EDFF",
-    },
-    {
-      id: 3,
-      title: "CÁC LOẠI VÉ LẺ",
-      benefits: [
-        "Vé Vòng Quay: 30.000đ - 50.000đ / vé",
-        "Riêng Băng Đăng: 70.000đ / vé",
-      ],
-      prices: { from: "30.000 VNĐ", to: "50.000 VNĐ" },
-      backgroundColor: "#FDE3F2",
     },
   ];
 

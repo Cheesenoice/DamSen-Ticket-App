@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import SupportChat from "../../components/supportchat";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.8; // 80% chiều rộng màn hình
@@ -349,6 +350,7 @@ export default function TicketScreen() {
           </ScrollView>
         )}
       </ScrollView>
+      <SupportChat />
     </View>
   );
 }

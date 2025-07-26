@@ -62,10 +62,16 @@ export default function AccountScreen() {
       <View style={styles.profileHeader}>
         <View style={styles.avatarContainer}>
           <Image
-            source={{
-              uri: "https://via.placeholder.com/100x100/FF69B4/FFFFFF?text=LA",
-            }}
-            style={styles.avatar}
+            source={require("../assets/images/logo-dam-sen.png")}
+            style={[
+              styles.avatar,
+              {
+                backgroundColor: '#fff',
+                resizeMode: 'cover',
+                borderWidth: 1,
+                borderColor: '#eee',
+              },
+            ]}
           />
         </View>
         <Text style={styles.userName}>Lê Văn A</Text>

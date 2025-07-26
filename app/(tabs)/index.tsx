@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import SupportChat from "../../components/supportchat";
 
 export default function HomeScreen() {
   return (
@@ -86,6 +87,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <SupportChat />
     </View>
   );
 }

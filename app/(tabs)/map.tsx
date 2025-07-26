@@ -24,12 +24,16 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
+import SupportChat from "../../components/supportchat";
 import Modal from "./modal";
 
 // --- Constants & Types ---
 const MAP_WIDTH = 1200;
 const MAP_HEIGHT = 900;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+// Debug mode flag - set to false for production
+const DEBUG_MODE = false;
 
 interface HotspotType {
   id: string;
@@ -42,6 +46,19 @@ interface HotspotType {
   description: string;
   x: number;
   y: number;
+}
+
+interface ControlPoint {
+  x: number;
+  y: number;
+}
+
+interface DebugPathData {
+  start: ControlPoint;
+  end: ControlPoint;
+  cp1: ControlPoint;
+  cp2: ControlPoint;
+  hotspotId: string;
 }
 
 const HOTSPOTS: HotspotType[] = [
@@ -82,6 +99,92 @@ const HOTSPOTS: HotspotType[] = [
     x: 890,
     y: 520,
   },
+  {
+    id: "zoo",
+    title: "Vườn thú",
+    subtitle: "~7 phút đi bộ",
+    category: "Khám phá • Động vật",
+    avatar: "🦁",
+    metrics: { waitTime: "0", distance: "200" },
+    isMaintenanceActive: false,
+    description:
+      "Khám phá thế giới động vật hoang dã với nhiều loài thú quý hiếm.",
+    x: 420,
+    y: 150,
+  },
+  {
+    id: "waterpark",
+    title: "Công viên nước",
+    subtitle: "~5 phút đi bộ",
+    category: "Vui chơi • Nước",
+    avatar: "💦",
+    metrics: { waitTime: "20", distance: "150" },
+    isMaintenanceActive: false,
+    description: "Trượt nước cực đã tại khu công viên nước sôi động!",
+    x: 1000,
+    y: 245,
+  },
+  {
+    id: "starStage",
+    title: "Sân khấu Ngôi Sao",
+    subtitle: "~3 phút đi bộ",
+    category: "Sự kiện • Giải trí",
+    avatar: "🎤",
+    metrics: { waitTime: "0", distance: "100" },
+    isMaintenanceActive: false,
+    description: "Nơi diễn ra các buổi biểu diễn và sự kiện hoành tráng!",
+    x: 775,
+    y: 480,
+  },
+  {
+    id: "icePalace",
+    title: "Băng Đăng",
+    subtitle: "~5 phút đi bộ",
+    category: "Khám phá • Băng tuyết",
+    avatar: "❄️",
+    metrics: { waitTime: "15", distance: "100" },
+    isMaintenanceActive: false,
+    description:
+      "Khám phá thế giới băng giá huyền ảo với các tác phẩm điêu khắc băng tuyệt đẹp!",
+    x: 470,
+    y: 345,
+  },
+  {
+    id: "flowerGarden",
+    title: "Vườn xương rồng",
+    subtitle: "~4 phút đi bộ",
+    category: "Thư giãn • Thiên nhiên",
+    avatar: "🌵",
+    metrics: { waitTime: "0", distance: "120" },
+    isMaintenanceActive: false,
+    description: "Không gian xanh mát với các loài xương rồng độc đáo.",
+    x: 540,
+    y: 565,
+  },
+  {
+    id: "aquarium",
+    title: "Cá Pha Lê",
+    subtitle: "~2 phút đi bộ",
+    category: "Khám phá • Đại dương",
+    avatar: "🐠",
+    metrics: { waitTime: "5", distance: "50" },
+    isMaintenanceActive: false,
+    description: "Chiêm ngưỡng thế giới biển lung linh và sống động.",
+    x: 920,
+    y: 620,
+  },
+  {
+    id: "dinoZone",
+    title: "Khu khủng long",
+    subtitle: "~6 phút đi bộ",
+    category: "Khám phá • Giải trí",
+    avatar: "🦖",
+    metrics: { waitTime: "0", distance: "160" },
+    isMaintenanceActive: false,
+    description: "Gặp gỡ những 'sinh vật cổ đại' trong khu khủng long kỳ thú.",
+    x: 410,
+    y: 365,
+  },
 ];
 
 const CURRENT_LOCATION = { id: "me", x: 460, y: 450 };
@@ -117,26 +220,459 @@ const CurrentLocation: React.FC<{ x: number; y: number }> = memo(({ x, y }) => (
   />
 ));
 
-// Route Path (SVG)
-const RoutePath: React.FC<{ show: boolean }> = ({ show }) =>
-  show ? (
+// Path generation utilities
+const getDefaultControlPoints = (
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  hotspotId: string
+): { cp1: ControlPoint; cp2: ControlPoint } => {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Control points for different destinations based on map layout
+  let cp1x, cp1y, cp2x, cp2y;
+
+  switch (hotspotId) {
+    case "castle": // Top-left, avoid going through buildings
+      cp1x = start.x + 1;
+      cp1y = start.y - 35;
+      cp2x = end.x + 44;
+      cp2y = end.y + 54;
+      break;
+
+    case "ferris": // Right side, gentle curve
+      cp1x = start.x - 8;
+      cp1y = start.y - 90;
+      cp2x = end.x + 79;
+      cp2y = end.y + 42;
+      break;
+
+    case "lake": // Bottom-right, curve around the lake
+      cp1x = start.x + 6;
+      cp1y = start.y + 155;
+      cp2x = end.x + 8;
+      cp2y = end.y + 54;
+      break;
+
+    case "zoo": // Top area, curve upward
+      cp1x = start.x + 72;
+      cp1y = start.y + -52;
+      cp2x = end.x + -355;
+      cp2y = end.y + 144;
+      break;
+
+    case "waterpark": // Far right, wide curve
+      cp1x = start.x + -19;
+      cp1y = start.y + -85;
+      cp2x = end.x + -83;
+      cp2y = end.y + -11;
+      break;
+
+    case "starStage": // Right-bottom, curve around lake
+      cp1x = start.x - 23;
+      cp1y = start.y + 127;
+      cp2x = end.x + 53;
+      cp2y = end.y + 132;
+      break;
+
+    case "icePalace": // Close by, gentle curve
+      cp1x = start.x - 15;
+      cp1y = start.y - 49;
+      cp2x = end.x + 93;
+      cp2y = end.y + 50;
+      break;
+
+    case "flowerGarden": // Bottom area, curve down
+      cp1x = start.x + 16;
+      cp1y = start.y + 103;
+      cp2x = end.x + 9;
+      cp2y = end.y - 46;
+      break;
+
+    case "aquarium": // Far bottom-right, wide curve
+      cp1x = start.x + 30;
+      cp1y = start.y + 180;
+      cp2x = end.x - 70;
+      cp2y = end.y - 115;
+      break;
+
+    case "dinoZone": // Left side, gentle curve
+      cp1x = start.x + 21;
+      cp1y = start.y - 70;
+      cp2x = end.x - 34;
+      cp2y = end.y + 28;
+      break;
+
+    default: // Generic smooth curve
+      const curveFactor = Math.min(distance * 0.3, 100);
+      cp1x = start.x + dx * 0.25 + (dy > 0 ? -curveFactor : curveFactor);
+      cp1y = start.y + dy * 0.25 + (dx > 0 ? -curveFactor : curveFactor);
+      cp2x = start.x + dx * 0.75 + (dy > 0 ? curveFactor : -curveFactor);
+      cp2y = start.y + dy * 0.75 + (dx > 0 ? curveFactor : -curveFactor);
+  }
+
+  return {
+    cp1: { x: cp1x, y: cp1y },
+    cp2: { x: cp2x, y: cp2y },
+  };
+};
+
+const generateCurvedPath = (
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  hotspotId: string,
+  customControlPoints?: { cp1: ControlPoint; cp2: ControlPoint }
+): string => {
+  const controlPoints =
+    customControlPoints || getDefaultControlPoints(start, end, hotspotId);
+  return `M${start.x},${start.y} C${controlPoints.cp1.x},${controlPoints.cp1.y} ${controlPoints.cp2.x},${controlPoints.cp2.y} ${end.x},${end.y}`;
+};
+
+// Debug Control Point Component
+const DraggableControlPoint: React.FC<{
+  point: ControlPoint;
+  color: string;
+  onDrag: (newPoint: ControlPoint) => void;
+}> = ({ point, color, onDrag }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  const handlePointerDown = React.useCallback(
+    (e: any) => {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent map pan/zoom
+
+      // Calculate offset from pointer to control point center
+      const svgElement = e.currentTarget.closest("svg");
+      if (!svgElement) return;
+
+      const rect = svgElement.getBoundingClientRect();
+      const pointerX = e.clientX - rect.left;
+      const pointerY = e.clientY - rect.top;
+
+      setDragOffset({
+        x: point.x - pointerX,
+        y: point.y - pointerY,
+      });
+
+      setIsDragging(true);
+    },
+    [point.x, point.y]
+  );
+
+  const handlePointerMove = React.useCallback(
+    (e: any) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Find the SVG container more reliably
+      const svgElement = document.querySelector(
+        'svg[width="1200"][height="900"]'
+      );
+      if (!svgElement) return;
+
+      const rect = svgElement.getBoundingClientRect();
+      const pointerX = e.clientX - rect.left;
+      const pointerY = e.clientY - rect.top;
+
+      // Apply offset to get accurate control point position
+      const newX = pointerX + dragOffset.x;
+      const newY = pointerY + dragOffset.y;
+
+      // Constrain to map bounds
+      const constrainedX = Math.max(0, Math.min(MAP_WIDTH, newX));
+      const constrainedY = Math.max(0, Math.min(MAP_HEIGHT, newY));
+
+      onDrag({ x: constrainedX, y: constrainedY });
+    },
+    [isDragging, onDrag, dragOffset]
+  );
+
+  const handlePointerUp = React.useCallback((e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  React.useEffect(() => {
+    if (isDragging) {
+      // Use capture phase to ensure we get events first
+      document.addEventListener("pointermove", handlePointerMove, {
+        capture: true,
+      });
+      document.addEventListener("pointerup", handlePointerUp, {
+        capture: true,
+      });
+      return () => {
+        document.removeEventListener("pointermove", handlePointerMove, {
+          capture: true,
+        });
+        document.removeEventListener("pointerup", handlePointerUp, {
+          capture: true,
+        });
+      };
+    }
+  }, [isDragging, handlePointerMove, handlePointerUp]);
+
+  return (
+    <g>
+      {/* Larger invisible hit area */}
+      <circle
+        cx={point.x}
+        cy={point.y}
+        r={20}
+        fill="transparent"
+        style={{ cursor: "pointer" }}
+        onPointerDown={handlePointerDown}
+      />
+      {/* Visible control point */}
+      <circle
+        cx={point.x}
+        cy={point.y}
+        r={8}
+        fill={color}
+        stroke="white"
+        strokeWidth={3}
+        style={{
+          cursor: "pointer",
+          pointerEvents: "none", // Let the larger circle handle events
+        }}
+      />
+      {/* Outer ring when dragging */}
+      {isDragging && (
+        <circle
+          cx={point.x}
+          cy={point.y}
+          r={12}
+          fill="none"
+          stroke={color}
+          strokeWidth={2}
+          strokeDasharray="4,4"
+          style={{ pointerEvents: "none" }}
+        />
+      )}
+    </g>
+  );
+};
+
+// Debug Info Panel
+const DebugPanel: React.FC<{ debugData: DebugPathData | null }> = ({
+  debugData,
+}) => {
+  if (!DEBUG_MODE || !debugData) return null;
+
+  return (
+    <View
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 20,
+        backgroundColor: "rgba(0,0,0,0.9)",
+        padding: 15,
+        borderRadius: 10,
+        zIndex: 1000,
+        minWidth: 160,
+        maxWidth: 320,
+      }}
+    >
+      <Text style={{ color: "white", fontWeight: "bold", marginBottom: 10 }}>
+        Debug Mode - {debugData.hotspotId}
+      </Text>
+      <Text style={{ color: "white", fontSize: 12 }}>
+        Start: ({debugData.start.x.toFixed(0)}, {debugData.start.y.toFixed(0)})
+      </Text>
+      <Text style={{ color: "white", fontSize: 12 }}>
+        End: ({debugData.end.x.toFixed(0)}, {debugData.end.y.toFixed(0)})
+      </Text>
+      <Text style={{ color: "#ff6b6b", fontSize: 12 }}>
+        CP1: ({debugData.cp1.x.toFixed(0)}, {debugData.cp1.y.toFixed(0)})
+      </Text>
+      <Text style={{ color: "#4ecdc4", fontSize: 12 }}>
+        CP2: ({debugData.cp2.x.toFixed(0)}, {debugData.cp2.y.toFixed(0)})
+      </Text>
+
+      <Text style={{ color: "yellow", fontSize: 10, marginTop: 10 }}>
+        Copy this to code:
+      </Text>
+      <Text style={{ color: "yellow", fontSize: 10 }}>
+        cp1x = start.x + {(debugData.cp1.x - debugData.start.x).toFixed(0)};
+      </Text>
+      <Text style={{ color: "yellow", fontSize: 10 }}>
+        cp1y = start.y + {(debugData.cp1.y - debugData.start.y).toFixed(0)};
+      </Text>
+      <Text style={{ color: "yellow", fontSize: 10 }}>
+        cp2x = end.x + {(debugData.cp2.x - debugData.end.x).toFixed(0)};
+      </Text>
+      <Text style={{ color: "yellow", fontSize: 10 }}>
+        cp2y = end.y + {(debugData.cp2.y - debugData.end.y).toFixed(0)};
+      </Text>
+    </View>
+  );
+};
+
+// Enhanced Route Path component with debug mode
+const RoutePath: React.FC<{
+  show: boolean;
+  destinationId?: string;
+  onDebugUpdate?: (debugData: DebugPathData) => void;
+}> = ({ show, destinationId, onDebugUpdate }) => {
+  // All hooks must be called before any conditional returns
+  const [debugControlPoints, setDebugControlPoints] = useState<{
+    cp1: ControlPoint;
+    cp2: ControlPoint;
+  } | null>(null);
+
+  const destination = destinationId
+    ? HOTSPOTS.find((h) => h.id === destinationId)
+    : null;
+
+  // Initialize debug control points
+  React.useEffect(() => {
+    if (DEBUG_MODE && destination && destinationId) {
+      const defaultPoints = getDefaultControlPoints(
+        CURRENT_LOCATION,
+        destination,
+        destinationId
+      );
+      setDebugControlPoints(defaultPoints);
+
+      if (onDebugUpdate) {
+        onDebugUpdate({
+          start: CURRENT_LOCATION,
+          end: destination,
+          cp1: defaultPoints.cp1,
+          cp2: defaultPoints.cp2,
+          hotspotId: destinationId,
+        });
+      }
+    }
+  }, [destinationId, destination, onDebugUpdate]);
+
+  // Early returns after all hooks
+  if (!show || !destinationId || !destination) return null;
+
+  const currentControlPoints =
+    DEBUG_MODE && debugControlPoints ? debugControlPoints : undefined;
+  const pathData = generateCurvedPath(
+    CURRENT_LOCATION,
+    destination,
+    destinationId,
+    currentControlPoints
+  );
+
+  const handleCP1Drag = (newPoint: ControlPoint) => {
+    if (!DEBUG_MODE || !debugControlPoints) return;
+    const newControlPoints = { ...debugControlPoints, cp1: newPoint };
+    setDebugControlPoints(newControlPoints);
+
+    if (onDebugUpdate) {
+      onDebugUpdate({
+        start: CURRENT_LOCATION,
+        end: destination,
+        cp1: newPoint,
+        cp2: debugControlPoints.cp2,
+        hotspotId: destinationId,
+      });
+    }
+  };
+
+  const handleCP2Drag = (newPoint: ControlPoint) => {
+    if (!DEBUG_MODE || !debugControlPoints) return;
+    const newControlPoints = { ...debugControlPoints, cp2: newPoint };
+    setDebugControlPoints(newControlPoints);
+
+    if (onDebugUpdate) {
+      onDebugUpdate({
+        start: CURRENT_LOCATION,
+        end: destination,
+        cp1: debugControlPoints.cp1,
+        cp2: newPoint,
+        hotspotId: destinationId,
+      });
+    }
+  };
+
+  return (
     <Svg
       width={MAP_WIDTH}
       height={MAP_HEIGHT}
-      style={{ position: "absolute", left: 0, top: 0 }}
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        zIndex: DEBUG_MODE ? 1000 : 10,
+        pointerEvents: DEBUG_MODE ? "auto" : "none",
+      }}
     >
+      {/* Path shadow for depth */}
       <Path
-        d={`M${CURRENT_LOCATION.x},${CURRENT_LOCATION.y} C${
-          CURRENT_LOCATION.x + 40
-        },${CURRENT_LOCATION.y - 100} ${FERRIS_LOCATION.x - 80},${
-          FERRIS_LOCATION.y + 95
-        } ${FERRIS_LOCATION.x},${FERRIS_LOCATION.y}`}
+        d={pathData}
+        stroke="rgba(233, 30, 99, 0.3)"
+        strokeWidth={10}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        pointerEvents="none"
+      />
+      {/* Main path */}
+      <Path
+        d={pathData}
         stroke="#E91E63"
         strokeWidth={6}
         fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray="10,5"
+        pointerEvents="none"
       />
+      {/* Path dots for animation effect */}
+      <Path
+        d={pathData}
+        stroke="#FF69B4"
+        strokeWidth={2}
+        fill="none"
+        strokeLinecap="round"
+        strokeDasharray="2,8"
+        pointerEvents="none"
+      />
+
+      {/* Debug mode: Show control lines and draggable points */}
+      {DEBUG_MODE && debugControlPoints && (
+        <>
+          {/* Control lines */}
+          <Path
+            d={`M${CURRENT_LOCATION.x},${CURRENT_LOCATION.y} L${debugControlPoints.cp1.x},${debugControlPoints.cp1.y}`}
+            stroke="#ff6b6b"
+            strokeWidth={1}
+            strokeDasharray="5,5"
+            fill="none"
+          />
+          <Path
+            d={`M${destination.x},${destination.y} L${debugControlPoints.cp2.x},${debugControlPoints.cp2.y}`}
+            stroke="#4ecdc4"
+            strokeWidth={1}
+            strokeDasharray="5,5"
+            fill="none"
+          />
+
+          {/* Draggable control points */}
+          <DraggableControlPoint
+            point={debugControlPoints.cp1}
+            color="#ff6b6b"
+            onDrag={handleCP1Drag}
+          />
+          <DraggableControlPoint
+            point={debugControlPoints.cp2}
+            color="#4ecdc4"
+            onDrag={handleCP2Drag}
+          />
+        </>
+      )}
     </Svg>
-  ) : null;
+  );
+};
 
 interface MapImageProps {
   scale: any;
@@ -148,6 +684,8 @@ interface MapImageProps {
   pinchRef: any;
   onHotspotPress: (h: HotspotType) => void;
   showRoute: boolean;
+  destinationId?: string;
+  onDebugUpdate?: (debugData: DebugPathData) => void;
 }
 
 interface WebState {
@@ -263,6 +801,8 @@ const MapImage: React.FC<MapImageProps> = memo(
     pinchRef,
     onHotspotPress,
     showRoute,
+    destinationId,
+    onDebugUpdate,
   }: MapImageProps) => {
     // --- Web state ---
     const [webState, setWebState] = React.useState<WebState>({
@@ -390,7 +930,11 @@ const MapImage: React.FC<MapImageProps> = memo(
               style={styles.mapImage}
               resizeMode="cover"
             />
-            <RoutePath show={showRoute} />
+            <RoutePath
+              show={showRoute}
+              destinationId={destinationId}
+              onDebugUpdate={onDebugUpdate}
+            />
             <CurrentLocation x={CURRENT_LOCATION.x} y={CURRENT_LOCATION.y} />
             {HOTSPOTS.map((h) => (
               <Hotspot
@@ -428,7 +972,11 @@ const MapImage: React.FC<MapImageProps> = memo(
                 style={styles.mapImage}
                 resizeMode="cover"
               />
-              <RoutePath show={showRoute} />
+              <RoutePath
+                show={showRoute}
+                destinationId={destinationId}
+                onDebugUpdate={onDebugUpdate}
+              />
               <CurrentLocation x={CURRENT_LOCATION.x} y={CURRENT_LOCATION.y} />
               {HOTSPOTS.map((h) => (
                 <Hotspot
@@ -649,14 +1197,15 @@ const BottomSheet: React.FC<{
 };
 
 // --- Main MapScreen ---
-export default function MapScreen() {
+const MapScreen: React.FC = () => {
+  const router = useRouter();
   const [selectedHotspot, setSelectedHotspot] = useState<HotspotType | null>(
     null
   );
-  const [showRoute, setShowRoute] = useState(false);
   const [navigationMode, setNavigationMode] = useState(false);
+  const [showRoute, setShowRoute] = useState(false);
+  const [debugData, setDebugData] = useState<DebugPathData | null>(null);
   const [showAlertModal, setShowAlertModal] = useState(false); // Thêm state modal
-  const router = useRouter();
 
   // Animation for pan/zoom
   const translateX = useSharedValue(0);
@@ -797,7 +1346,7 @@ export default function MapScreen() {
         onPress={() => setShowAlertModal(true)}
         activeOpacity={0.8}
       >
-        <Text style={{ fontSize: 32 }}>✉</Text>
+        <Text style={{ fontSize: 32 }}>🚨</Text>
       </TouchableOpacity>
       {/* Fixed go-to-current-location button */}
       <TouchableOpacity
@@ -823,6 +1372,8 @@ export default function MapScreen() {
         pinchRef={pinchRef}
         onHotspotPress={openHotspot}
         showRoute={showRoute}
+        destinationId={selectedHotspot?.id}
+        onDebugUpdate={setDebugData}
         {...(isWeb
           ? {
               ref: (ref: HTMLDivElement | null) => {
@@ -881,9 +1432,13 @@ export default function MapScreen() {
           }
         }}
       />
+      <DebugPanel debugData={debugData} />
+      <SupportChat />
     </View>
   );
-}
+};
+
+export default MapScreen;
 
 // --- Styles ---
 const styles = StyleSheet.create({
@@ -1122,7 +1677,7 @@ const styles = StyleSheet.create({
   currentLocationBtn: {
     position: "absolute",
     bottom: 32,
-    right: 24,
+    left: 24,
     zIndex: 300,
     width: 56,
     height: 56,

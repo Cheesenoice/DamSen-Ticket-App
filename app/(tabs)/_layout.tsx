@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import CustomTabBar from "./CustomTabBar";
@@ -69,12 +69,16 @@ export default function TabLayout() {
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push("/account")}>
-              <View
+              <Image
+                source={require("../../assets/images/logo-dam-sen.png")}
                 style={{
                   width: 28,
                   height: 28,
-                  backgroundColor: "#bbb",
                   borderRadius: 14,
+                  backgroundColor: '#fff',
+                  resizeMode: 'cover',
+                  borderWidth: 1,
+                  borderColor: '#eee',
                 }}
               />
             </TouchableOpacity>
@@ -110,12 +114,16 @@ export default function TabLayout() {
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push("/account")}>
-              <View
+              <Image
+                source={require("../../assets/images/logo-dam-sen.png")}
                 style={{
                   width: 28,
                   height: 28,
-                  backgroundColor: "#bbb",
                   borderRadius: 14,
+                  backgroundColor: '#fff',
+                  resizeMode: 'cover',
+                  borderWidth: 1,
+                  borderColor: '#eee',
                 }}
               />
             </TouchableOpacity>
@@ -150,12 +158,16 @@ export default function TabLayout() {
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push("/account")}>
-              <View
+              <Image
+                source={require("../../assets/images/logo-dam-sen.png")}
                 style={{
                   width: 28,
                   height: 28,
-                  backgroundColor: "#bbb",
                   borderRadius: 14,
+                  backgroundColor: '#fff',
+                  resizeMode: 'cover',
+                  borderWidth: 1,
+                  borderColor: '#eee',
                 }}
               />
             </TouchableOpacity>
@@ -191,12 +203,16 @@ export default function TabLayout() {
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push("/account")}>
-              <View
+              <Image
+                source={require("../../assets/images/logo-dam-sen.png")}
                 style={{
                   width: 28,
                   height: 28,
-                  backgroundColor: "#bbb",
                   borderRadius: 14,
+                  backgroundColor: '#fff',
+                  resizeMode: 'cover',
+                  borderWidth: 1,
+                  borderColor: '#eee',
                 }}
               />
             </TouchableOpacity>

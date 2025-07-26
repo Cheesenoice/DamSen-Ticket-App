@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import SupportChat from "../../components/supportchat";
 
 const FILTERS = ["Mọi thể loại", "Hang động", "Cảm giác mạnh", "Phiêu lưu"];
 
@@ -132,6 +133,7 @@ export default function ExploreScreen() {
           ))}
         </ScrollView>
       </View>
+      <SupportChat />
     </View>
   );
 }

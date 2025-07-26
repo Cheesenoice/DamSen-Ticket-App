@@ -7,6 +7,7 @@ import {
 import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import SupportChat from "../../components/supportchat";
 
 export default function QRScreen() {
   const router = useRouter();
@@ -63,6 +64,7 @@ export default function QRScreen() {
         <Text style={styles.scanButtonText}>Quét mã QR check-in tại cổng</Text>
       </TouchableOpacity>
       <Text style={styles.footerText}>Sau đó chọn loại vé của bạn</Text>
+      <SupportChat />
     </View>
   );
 }

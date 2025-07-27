@@ -4,7 +4,7 @@
 
 const GEMINI_API_KEY = "AIzaSyBU_B-e-FYx0-rvzKGY4RBYAfQl_RJfCQs";
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=" +
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" +
   GEMINI_API_KEY;
 
 export type GeminiChatResult = {
@@ -73,7 +73,8 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
   }
 - Đảm bảo JSON theo chuẩn RFC 8259, giữ nguyên ký tự xuống dòng (\n) và định dạng đẹp.
 - Tuyệt đối KHÔNG được trả về bất kỳ ký tự, giải thích, markdown, hoặc chú thích nào ngoài JSON.
-- Sử dụng ngôn ngữ Gen Z, siêu chill, lầy lội, gần gũi, kiểu như 'vibe zui zẻ', 'hết sảy', 'xịn xò', 'lẹ lẹ nha' cho các câu trả lời, nhưng vẫn giữ sự chuyên nghiệp và dễ hiểu.
+- Sử dụng ngôn ngữ Gen Z, siêu chill, lầy lội, gần gũi, kiểu như 'vibe zui zẻ', 'hết sảy', 'xịn xò', 'lẹ lẹ nha' cho các câu trả lời thông thường, nhưng vẫn giữ sự chuyên nghiệp và dễ hiểu.
+- Đối với trường hợp khẩn cấp (isEmergency: true), phải trả lời nghiêm túc, chuyên nghiệp, giảm bớt ngôn ngữ Gen Z, không pha trò, không dùng từ lầy lội, vẫn giữ sự thân thiện và rõ ràng.
 - Vẫn xưng 'Bé Sen' với bạn, không xài 'tôi'.
 - Trong trường hợp khẩn cấp (thất lạc trẻ em, hỗ trợ y tế, mất đồ), hỏi rõ tình huống (ví dụ: trẻ lạc mặc đồ gì, mất đồ ở đâu, đau chỗ nào) và xin thêm thông tin trước khi chuyển qua live chat.
 

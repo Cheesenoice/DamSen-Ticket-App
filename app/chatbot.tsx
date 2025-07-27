@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { chatWithGemini } from "./geminiChat";
+import { chatWithGemini, GeminiApiContent } from "./geminiChat";
 // import logoDamSen from "../assets/images/logo-dam-sen.png";
 const logoDamSen = require("../assets/images/logo-dam-sen.png");
 
@@ -29,6 +29,7 @@ const initialMessages = [
 
 export default function ChatbotScreen() {
   const [messages, setMessages] = useState(initialMessages);
+  const [chatHistory, setChatHistory] = useState<GeminiApiContent[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList<any>>(null);
@@ -65,17 +66,25 @@ export default function ChatbotScreen() {
     setInput("");
     setLoading(true);
     try {
-      // Gọi Gemini trực tiếp bằng hàm client-side
-      const data = await chatWithGemini(userMsg.text);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString() + "-ai",
-          type: "incoming",
-          text: data.reply,
-          timestamp: new Date().toISOString(),
-        },
+      // Gọi Gemini với chat history
+      const data = await chatWithGemini(userMsg.text, chatHistory);
+
+      // Cập nhật UI
+      const aiMsg = {
+        id: Date.now().toString() + "-ai",
+        type: "incoming",
+        text: data.reply,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+
+      // Cập nhật chat history để gửi trong lần gọi tiếp theo
+      setChatHistory((prevHistory) => [
+        ...prevHistory,
+        { role: "user", parts: [{ text: userMsg.text }] },
+        { role: "model", parts: [{ text: data.reply }] },
       ]);
+
       if (data.isEmergency) {
         setIsEmergency(true);
       } else {

@@ -13,11 +13,14 @@ export type GeminiChatResult = {
   error?: string;
 };
 
+// Define type for content parts in a message
 interface GeminiApiContentPart {
   text: string;
 }
 
-interface GeminiApiContent {
+// Define type for a message in the conversation (includes role and content)
+export interface GeminiApiContent {
+  role: "user" | "model"; // Role must be 'user' or 'model'
   parts: GeminiApiContentPart[];
 }
 
@@ -29,28 +32,9 @@ interface GeminiApiResponse {
   candidates?: GeminiApiCandidate[];
 }
 
-export async function chatWithGemini(
-  message: string
-): Promise<GeminiChatResult> {
-  // Validate input
-  if (!message || typeof message !== "string") {
-    return {
-      reply: "Vui lòng nhập câu hỏi hoặc yêu cầu!",
-      isEmergency: false,
-      error: "invalid_input",
-    };
-  }
-  if (message.length > 500) {
-    return {
-      reply: "Câu hỏi quá dài, vui lòng nhập dưới 500 ký tự.",
-      isEmergency: false,
-      error: "input_too_long",
-    };
-  }
-
-  // Build prompt (copy from backend, with message injected)
-  const prompt = `
-Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò nhân viên hỗ trợ khách tham quan tại Công viên Nước Đầm Sen, TP. Hồ Chí Minh. Nhiệm vụ của bạn là trả lời các câu hỏi của khách một cách lịch sự, dễ hiểu, ngắn gọn, phù hợp với mọi lứa tuổi (người lớn, trẻ em, người cao tuổi). Sử dụng ngôn ngữ đơn giản, tránh thuật ngữ kỹ thuật. 
+// Define system instructions once
+const SYSTEM_INSTRUCTIONS = `
+Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò nhân viên hỗ trợ khách tham quan tại Công viên Nước Đầm Sen, TP. Hồ Chí Minh. Nhiệm vụ của bạn là trả lời các câu hỏi của khách một cách lịch sự, dễ hiểu, ngắn gọn, phù hợp với mọi lứa tuổi (người lớn, trẻ em, người cao tuổi). Sử dụng ngôn ngữ đơn giản, tránh thuật ngữ kỹ thuật.
 
 **Mục tiêu chính**:
 - Giải đáp nhanh chóng các câu hỏi thông thường (như giá vé, giờ hoạt động, menu nhà hàng, trò chơi phù hợp, v.v.) để giảm tải cho hotline (028 3963 2483) và nhân viên.
@@ -58,6 +42,8 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
 - Nếu câu hỏi vượt ngoài khả năng, trả lời: "Dạ, mình xin lỗi vì câu hỏi này cần hỗ trợ chi tiết hơn. Mình sẽ chuyển bạn đến live chat để nhân viên hỗ trợ ngay nhé! 😊"
 
 **Yêu cầu định dạng trả lời**:
+- Đối với trường hợp khẩn cấp (isEmergency: true), phải trả lời nghiêm túc, chuyên nghiệp, giảm bớt ngôn ngữ Gen Z, không pha trò, không dùng từ lầy lội, vẫn giữ sự thân thiện và rõ ràng.
+- Khi trả lời tình huống khẩn cấp, chỉ dùng emoji phù hợp (ví dụ: cảnh báo, lo lắng, hỗ trợ), tuyệt đối không dùng emoji mang tính đùa cợt, tự tin, hoặc không phù hợp như 😎, 😂, 🤣, 👻...
 - Chỉ được trả về JSON hợp lệ đúng định dạng bên dưới, KHÔNG được thêm bất cứ ký tự, markdown, giải thích, hoặc chú thích nào ngoài JSON.
 - Nếu không thể trả lời, vẫn phải trả về một JSON hợp lệ đúng định dạng yêu cầu với reply giải thích lý do.
 - Bạn có tên là "Bé Sen", hãy xưng hô Bé Sen với người dùng.
@@ -74,7 +60,6 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
 - Đảm bảo JSON theo chuẩn RFC 8259, giữ nguyên ký tự xuống dòng (\n) và định dạng đẹp.
 - Tuyệt đối KHÔNG được trả về bất kỳ ký tự, giải thích, markdown, hoặc chú thích nào ngoài JSON.
 - Sử dụng ngôn ngữ Gen Z, siêu chill, lầy lội, gần gũi, kiểu như 'vibe zui zẻ', 'hết sảy', 'xịn xò', 'lẹ lẹ nha' cho các câu trả lời thông thường, nhưng vẫn giữ sự chuyên nghiệp và dễ hiểu.
-- Đối với trường hợp khẩn cấp (isEmergency: true), phải trả lời nghiêm túc, chuyên nghiệp, giảm bớt ngôn ngữ Gen Z, không pha trò, không dùng từ lầy lội, vẫn giữ sự thân thiện và rõ ràng.
 - Vẫn xưng 'Bé Sen' với bạn, không xài 'tôi'.
 - Trong trường hợp khẩn cấp (thất lạc trẻ em, hỗ trợ y tế, mất đồ), hỏi rõ tình huống (ví dụ: trẻ lạc mặc đồ gì, mất đồ ở đâu, đau chỗ nào) và xin thêm thông tin trước khi chuyển qua live chat.
 
@@ -199,7 +184,7 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
 **Tình huống khẩn cấp**:
 - Bao gồm: Thất lạc trẻ em, hỗ trợ y tế, mất đồ.
 - Hỏi rõ tình huống (ví dụ: trẻ lạc mặc đồ gì, mất đồ ở đâu, đau chỗ nào) và xin thêm thông tin trước khi chuyển qua live chat.
-- Trả lời: "Ủa bạn, chuyện gì zậy? [Hỏi chi tiết tình huống]. Bé Sen chuyển bạn qua live chat để team hỗ trợ liền nha! 🚨" với isEmergency: true.
+- Trả lời: "🚨 Ủa bạn, chuyện gì zậy? [Hỏi chi tiết tình huống]. Bé Sen chuyển bạn qua live chat để team hỗ trợ liền nha! 🚨" với isEmergency: true.
 
 **Tình huống phức tạp**:
 - Ví dụ: Đổi vé, lỗi thanh toán, khiếu nại, hợp tác, quay phim.
@@ -211,29 +196,51 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
 - **Câu hỏi**: "Menu nhà hàng Thủy Tạ có gì?"
   **Trả lời**: {"reply": "🍽 Menu Thủy Tạ siêu ngon nè bạn:\n- Cơm chiên: 50k-70k\n- Phở, bún bò: 70k-100k\n- Nước suối, trà sữa: 15k-30k\nMuốn Bé Sen gợi ý món nào cho bạn hông? 😜", "isEmergency": false}
 - **Câu hỏi**: "Bé nhà mình lạc rồi, mặc áo đỏ"
-  **Trả lời**: {"reply": "🚨 Trời ơi, lạc bé hả bạn? Bé mặc áo đỏ, tầm mấy tuổi, lạc ở khu nào nè? Cho Bé Sen thêm info đi, rồi mình chuyển bạn qua live chat để team tìm liền nha! 😎", "isEmergency": true}
+  **Trả lời**: {"reply": "🚨 Trời ơi, lạc bé hả bạn? Bé mặc áo đỏ, tầm mấy tuổi, lạc ở khu nào nè? Cho Bé Sen thêm info đi, rồi mình chuyển bạn qua live chat để team tìm liền nha! 🚨", "isEmergency": true}
 - **Câu hỏi**: "Trẻ em chơi băng đăng được không?"
   **Trả lời**: {"reply": "🧊 Băng đăng oke cho bé trên 1m nha, mặc đồ bơi, không mang giày dép. Bé dưới 1m thì chill ở khu thiếu nhi an toàn hơn nè! 😎", "isEmergency": false}
 - **Câu hỏi**: "Mình bị mất ví ở khu hồ bơi"
-  **Trả lời**: {"reply": "🚨 Ủa, mất ví hả bạn? Ví trông thế nào, mất ở khu hồ bơi chỗ nào nè? Cho Bé Sen thêm tí info, rồi mình chuyển bạn qua live chat để team hỗ trợ lẹ nha! 😎", "isEmergency": true}
+  **Trả lời**: {"reply": "🚨 Ủa, mất ví hả bạn? Ví trông thế nào, mất ở khu hồ bơi chỗ nào nè? Cho Bé Sen thêm tí info, rồi mình chuyển bạn qua live chat để team hỗ trợ lẹ nha! 🚨", "isEmergency": true}
 - **Câu hỏi**: "Mình bị đau chân, cần hỗ trợ y tế"
-  **Trả lời**: {"reply": "🚑 Trời, đau chân hả bạn? Đau ở đâu, có đi lại được hông? Cho Bé Sen thêm info nha, rồi mình chuyển bạn qua live chat để team y tế hỗ trợ liền! 😎", "isEmergency": true}
+  **Trả lời**: {"reply": "🚑 Trời, đau chân hả bạn? Đau ở đâu, có đi lại được hông? Cho Bé Sen thêm info nha, rồi mình chuyển bạn qua live chat để team y tế hỗ trợ liền! 🚨", "isEmergency": true}
+`;
 
-**Câu hỏi của khách**
-"${message.replace(/["]|[\\]/g, "\\$&")}"
+export async function chatWithGemini(
+  message: string,
+  // Add chat history parameter
+  chatHistory: GeminiApiContent[] = []
+): Promise<GeminiChatResult> {
+  // Validate input
+  if (!message || typeof message !== "string") {
+    return {
+      reply: "Vui lòng nhập câu hỏi hoặc yêu cầu!",
+      isEmergency: false,
+      error: "invalid_input",
+    };
+  }
+  if (message.length > 500) {
+    return {
+      reply: "Câu hỏi quá dài, vui lòng nhập dưới 500 ký tự.",
+      isEmergency: false,
+      error: "input_too_long",
+    };
+  }
 
-**Lưu ý cuối**
-- Ưu tiên trả lời tự động cho câu hỏi thông thường để giảm tải hotline/nhân viên.
-- Chỉ chuyển đến live chat cho tình huống khẩn cấp (thất lạc trẻ em, hỗ trợ y tế, mất đồ) hoặc phức tạp, với isEmergency: true.
-- Giữ giọng điệu thân thiện, chuyên nghiệp, đúng vai trò nhân viên hỗ trợ, nhưng thêm vibe Gen Z zui zẻ, lầy lội.`;
+  // Build content for the API request
+  // Start with system instructions, then chat history, and finally the current message
+  const contents: GeminiApiContent[] = [
+    ...chatHistory, // Add existing chat history
+    {
+      role: "user",
+      parts: [{ text: message.replace(/[["]|[\\]/g, "\\$&") }], // Current user message
+    },
+  ];
 
-  // Gemini API expects a specific structure
   const requestBody = {
-    contents: [
-      {
-        parts: [{ text: prompt }],
-      },
-    ],
+    contents: contents,
+    systemInstruction: {
+      parts: [{ text: SYSTEM_INSTRUCTIONS }],
+    },
   };
 
   try {
@@ -244,6 +251,7 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
       },
       body: JSON.stringify(requestBody),
     });
+
     if (!response.ok) {
       return {
         reply: "Có lỗi xảy ra khi gọi AI (Gemini API)",
@@ -251,10 +259,12 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
         error: `api_error_${response.status}`,
       };
     }
+
     const data: GeminiApiResponse = await response.json();
-    // Extract text from Gemini API response
+
     let rawText: string | undefined =
       data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
     if (!rawText) {
       return {
         reply: "Không nhận được phản hồi từ AI.",
@@ -262,6 +272,7 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
         error: "no_ai_response",
       };
     }
+
     // Remove code block markers if present
     if (rawText.startsWith("```json")) {
       rawText = rawText
@@ -271,17 +282,21 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
     } else if (rawText.startsWith("```")) {
       rawText = rawText.replace(/```/g, "").trim();
     }
-    // Parse JSON
+
+    // Parse JSON. If it fails, assume it's a plain text response.
     let parsedResponse: GeminiChatResult;
     try {
+      // First, try to parse it as JSON
       parsedResponse = JSON.parse(rawText) as GeminiChatResult;
     } catch (err) {
-      return {
-        reply: "Phản hồi từ AI không hợp lệ (lỗi JSON)",
+      // If parsing fails, it's likely a plain text response.
+      // Treat it as a non-emergency reply.
+      parsedResponse = {
+        reply: rawText, // Use the raw text directly
         isEmergency: false,
-        error: "json_parse_error",
       };
     }
+
     if (
       !parsedResponse.reply ||
       typeof parsedResponse.isEmergency !== "boolean"
@@ -292,8 +307,10 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
         error: "missing_fields",
       };
     }
+
     // Format reply (replace \n with real newlines)
     const formattedReply: string = parsedResponse.reply.replace(/\\n/g, "\n");
+
     return {
       reply: formattedReply,
       isEmergency: parsedResponse.isEmergency,

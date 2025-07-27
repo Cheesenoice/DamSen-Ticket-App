@@ -33,6 +33,7 @@ export default function ChatbotScreen() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList<any>>(null);
+  const inputRef = useRef<TextInput>(null);
   const { preset } = useLocalSearchParams();
   const [presetSent, setPresetSent] = useState(false);
   const [isEmergency, setIsEmergency] = useState(false);
@@ -111,8 +112,12 @@ export default function ChatbotScreen() {
   // Hàm gửi tin nhắn từ input (dùng cho onSubmitEditing và onPress)
   const sendMessageFromInput = (e?: any) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
-    sendMessage();
+    sendMessage().then(() => {
+      // Giữ focus lại cho input sau khi gửi
+      inputRef.current?.focus();
+    });
   };
+
 
   // Animation for emergency dots
   React.useEffect(() => {
@@ -199,6 +204,7 @@ export default function ChatbotScreen() {
         {/* Input area */}
         <View style={styles.inputContainer}>
           <TextInput
+            ref={inputRef}
             style={styles.input}
             placeholder="Nhập tin nhắn..."
             placeholderTextColor="#999"

@@ -73,7 +73,7 @@ export default function ChatbotScreen() {
       const aiMsg = {
         id: Date.now().toString() + "-ai",
         type: "incoming",
-        text: data.reply,
+        text: data.reply, 
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, aiMsg]);
@@ -143,11 +143,7 @@ export default function ChatbotScreen() {
       >
         {isIncoming && (
           <View style={styles.avatarContainer}>
-            <Image
-              source={logoDamSen}
-              style={styles.avatarLogo}
-              resizeMode="contain"
-            />
+            <Image source={logoDamSen} style={styles.avatarLogo} />
           </View>
         )}
         <View

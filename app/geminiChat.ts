@@ -273,27 +273,25 @@ export async function chatWithGemini(
       };
     }
 
-    // Remove code block markers if present
-    if (rawText.startsWith("```json")) {
-      rawText = rawText
-        .replace(/```json\s*/i, "")
-        .replace(/```$/, "")
-        .trim();
-    } else if (rawText.startsWith("```")) {
-      rawText = rawText.replace(/```/g, "").trim();
-    }
-
-    // Parse JSON. If it fails, assume it's a plain text response.
+    // Final, robust JSON extraction and parsing
     let parsedResponse: GeminiChatResult;
     try {
-      // First, try to parse it as JSON
-      parsedResponse = JSON.parse(rawText) as GeminiChatResult;
+      // Regex to find JSON content, even if wrapped in markdown
+      const jsonMatch = rawText.match(/\s*(\{.*\})\s*/s);
+      if (jsonMatch && jsonMatch[1]) {
+        // If a JSON object string is found, parse it
+        parsedResponse = JSON.parse(jsonMatch[1]) as GeminiChatResult;
+      } else {
+        // This case handles plain text responses from the AI that are not JSON
+        parsedResponse = { reply: rawText, isEmergency: false };
+      }
     } catch (err) {
-      // If parsing fails, it's likely a plain text response.
-      // Treat it as a non-emergency reply.
+      // This is a fallback if JSON.parse fails or for any other error.
+      // It ensures we always have a valid object to work with.
       parsedResponse = {
-        reply: rawText, // Use the raw text directly
+        reply: rawText, // Display the raw text on error
         isEmergency: false,
+        error: "json_parse_error",
       };
     }
 

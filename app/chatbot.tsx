@@ -22,7 +22,7 @@ const initialMessages = [
   {
     id: "1",
     type: "incoming",
-    text: "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?",
+    text: "Xin chào! Bé Sen có thể giúp gì cho bạn hôm nay?🤔",
     timestamp: new Date().toISOString(),
   },
 ];

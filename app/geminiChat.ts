@@ -232,7 +232,7 @@ export async function chatWithGemini(
     ...chatHistory, // Add existing chat history
     {
       role: "user",
-      parts: [{ text: message.replace(/[["]|[\\]/g, "\\$&") }], // Current user message
+      parts: [{ text: message.replace(/[\[\"]|[\\]/g, "\\$&") + "\n\nLưu ý: Hãy trả lời đúng định dạng JSON sau, không thêm giải thích, markdown hay bất cứ ký tự nào ngoài JSON.\n{\n  \"reply\": \"...\",\n  \"isEmergency\": true hoặc false\n}" }], // Current user message
     },
   ];
 
@@ -273,48 +273,46 @@ export async function chatWithGemini(
       };
     }
 
-    // Final logic: Aggressively find JSON, parse it, or clean up the raw text.
-    let parsedResponse: GeminiChatResult;
-    try {
-      const jsonMatch = rawText.match(/({(?:[^{}]|\{[^{}]*\})*})/);
-
-      if (jsonMatch && jsonMatch[0]) {
-        const jsonString = jsonMatch[0];
-        const tempResponse = JSON.parse(jsonString) as GeminiChatResult;
-        // Ensure the parsed object has the required fields
-        if (tempResponse.reply && typeof tempResponse.isEmergency === 'boolean') {
-            parsedResponse = tempResponse;
-        } else {
-            // The parsed JSON is not in the expected format, treat as plain text.
-            throw new Error("Parsed JSON is missing required fields.");
+    // --- Normalization function for AI replies ---
+    function normalizeGeminiReply(raw: string): GeminiChatResult {
+      // Remove markdown code fences and trim
+      let cleaned = raw.replace(/```json|```/gi, '').trim();
+      // Try to extract the first valid JSON object anywhere in the string
+      let jsonStart = cleaned.indexOf('{');
+      let jsonEnd = cleaned.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        let jsonCandidate = cleaned.substring(jsonStart, jsonEnd + 1);
+        // Escape lại các xuống dòng thật bên trong chuỗi reply thành \n
+        jsonCandidate = jsonCandidate.replace(
+          /"reply":\s*"([\s\S]*?)"/g,
+          (match, p1) => {
+            // Chỉ escape \n nếu không nằm trong chuỗi escape
+            return '"reply": "' + p1.replace(/\n/g, '\\n') + '"';
+          }
+        );
+        try {
+          const obj = JSON.parse(jsonCandidate);
+          if (
+            typeof obj.reply === 'string' &&
+            typeof obj.isEmergency === 'boolean'
+          ) {
+            return {
+              reply: obj.reply,
+              isEmergency: obj.isEmergency,
+            };
+          }
+        } catch (e) {
+          // Fallback to plain text below
         }
-      } else {
-        // No JSON object found, treat as plain text.
-        throw new Error("No JSON object found in the response.");
       }
-    } catch (err) {
-      // This block now catches: 
-      // 1. No JSON found
-      // 2. JSON.parse() errors
-      // 3. Parsed JSON missing fields
-      
-      // Clean the raw text of any markdown, JSON, or braces artifacts
-      let cleanedText = rawText
-        .replace(/```json/gi, '')
-        .replace(/```/g, '')
-        .replace(/^{[\s\S]*"reply"\s*:\s*"/m, '') // Remove leading { ... "reply": "
-        .replace(/"[\s\S]*$/m, '') // Remove trailing " ... }
-        .replace(/^\s*{\s*|\s*}\s*$/g, '') // Remove any remaining braces at start/end
-        .trim();
-
-      // Remove any leading/trailing quotes
-      cleanedText = cleanedText.replace(/^"|"$/g, '').trim();
-
-      parsedResponse = {
-        reply: cleanedText,
-        isEmergency: false, // Default to false for plain text
+      // If not JSON, treat as plain text
+      return {
+        reply: cleaned,
+        isEmergency: false,
       };
     }
+
+    const parsedResponse = normalizeGeminiReply(rawText);
 
     if (
       !parsedResponse.reply ||

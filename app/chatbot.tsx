@@ -74,7 +74,25 @@ export default function ChatbotScreen() {
       const aiMsg = {
         id: Date.now().toString() + "-ai",
         type: "incoming",
-        text: data.reply,
+        text: (() => {
+          if (typeof data.reply === 'string') {
+            // Nếu là string JSON, parse và lấy trường reply
+            try {
+              const obj = JSON.parse(data.reply);
+              if (obj && typeof obj.reply === 'string') return obj.reply;
+            } catch {}
+            return data.reply;
+          }
+          if (
+            typeof data.reply === 'object' &&
+            data.reply !== null &&
+            'reply' in data.reply &&
+            typeof (data.reply as { reply?: unknown }).reply === 'string'
+          ) {
+            return (data.reply as { reply: string }).reply;
+          }
+          return '';
+        })(),
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, aiMsg]);
@@ -167,7 +185,12 @@ export default function ChatbotScreen() {
               isIncoming ? styles.incomingText : styles.outgoingText,
             ]}
           >
-            {item.text}
+            {item.text.split('\n').map((line: string, idx: number, arr: string[]) => (
+  <React.Fragment key={idx}>
+    {line}
+    {idx < arr.length - 1 && '\n'}
+  </React.Fragment>
+))}
           </Text>
         </View>
       </View>

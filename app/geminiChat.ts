@@ -273,25 +273,46 @@ export async function chatWithGemini(
       };
     }
 
-    // Final, robust JSON extraction and parsing
+    // Final logic: Aggressively find JSON, parse it, or clean up the raw text.
     let parsedResponse: GeminiChatResult;
     try {
-      // Regex to find JSON content, even if wrapped in markdown
-      const jsonMatch = rawText.match(/\s*(\{.*\})\s*/s);
-      if (jsonMatch && jsonMatch[1]) {
-        // If a JSON object string is found, parse it
-        parsedResponse = JSON.parse(jsonMatch[1]) as GeminiChatResult;
+      const jsonMatch = rawText.match(/({(?:[^{}]|\{[^{}]*\})*})/);
+
+      if (jsonMatch && jsonMatch[0]) {
+        const jsonString = jsonMatch[0];
+        const tempResponse = JSON.parse(jsonString) as GeminiChatResult;
+        // Ensure the parsed object has the required fields
+        if (tempResponse.reply && typeof tempResponse.isEmergency === 'boolean') {
+            parsedResponse = tempResponse;
+        } else {
+            // The parsed JSON is not in the expected format, treat as plain text.
+            throw new Error("Parsed JSON is missing required fields.");
+        }
       } else {
-        // This case handles plain text responses from the AI that are not JSON
-        parsedResponse = { reply: rawText, isEmergency: false };
+        // No JSON object found, treat as plain text.
+        throw new Error("No JSON object found in the response.");
       }
     } catch (err) {
-      // This is a fallback if JSON.parse fails or for any other error.
-      // It ensures we always have a valid object to work with.
+      // This block now catches: 
+      // 1. No JSON found
+      // 2. JSON.parse() errors
+      // 3. Parsed JSON missing fields
+      
+      // Clean the raw text of any markdown, JSON, or braces artifacts
+      let cleanedText = rawText
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .replace(/^{[\s\S]*"reply"\s*:\s*"/m, '') // Remove leading { ... "reply": "
+        .replace(/"[\s\S]*$/m, '') // Remove trailing " ... }
+        .replace(/^\s*{\s*|\s*}\s*$/g, '') // Remove any remaining braces at start/end
+        .trim();
+
+      // Remove any leading/trailing quotes
+      cleanedText = cleanedText.replace(/^"|"$/g, '').trim();
+
       parsedResponse = {
-        reply: rawText, // Display the raw text on error
-        isEmergency: false,
-        error: "json_parse_error",
+        reply: cleanedText,
+        isEmergency: false, // Default to false for plain text
       };
     }
 

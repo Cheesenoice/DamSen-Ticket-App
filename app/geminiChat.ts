@@ -52,6 +52,7 @@ Bạn là một trợ lý ảo thân thiện, chuyên nghiệp, đóng vai trò 
 - Sử dụng danh sách (bullet points với dấu -) khi liệt kê thông tin (như giá vé, trò chơi, lưu ý).
 - Thêm emoji phù hợp để thân thiện, nhưng không lạm dụng.
 - Mỗi ý chính cách nhau bằng một dòng trống.
+- Response không dùng Markdown.
 - Đầu ra **phải là JSON hợp lệ** theo định dạng:
   {
     "reply": "Câu trả lời bằng tiếng Việt, thân thiện, đúng giọng điệu, có xuống dòng (\\n) và danh sách bullet (-)",
@@ -232,7 +233,13 @@ export async function chatWithGemini(
     ...chatHistory, // Add existing chat history
     {
       role: "user",
-      parts: [{ text: message.replace(/[\[\"]|[\\]/g, "\\$&") + "\n\nLưu ý: Hãy trả lời đúng định dạng JSON sau, không thêm giải thích, markdown hay bất cứ ký tự nào ngoài JSON.\n{\n  \"reply\": \"...\",\n  \"isEmergency\": true hoặc false\n}" }], // Current user message
+      parts: [
+        {
+          text:
+            message.replace(/[\[\"]|[\\]/g, "\\$&") +
+            '\n\nLưu ý: Hãy trả lời đúng định dạng JSON sau, không thêm giải thích, markdown hay bất cứ ký tự nào ngoài JSON.\n{\n  "reply": "...",\n  "isEmergency": true hoặc false\n}',
+        },
+      ], // Current user message
     },
   ];
 
@@ -276,10 +283,10 @@ export async function chatWithGemini(
     // --- Normalization function for AI replies ---
     function normalizeGeminiReply(raw: string): GeminiChatResult {
       // Remove markdown code fences and trim
-      let cleaned = raw.replace(/```json|```/gi, '').trim();
+      let cleaned = raw.replace(/```json|```/gi, "").trim();
       // Try to extract the first valid JSON object anywhere in the string
-      let jsonStart = cleaned.indexOf('{');
-      let jsonEnd = cleaned.lastIndexOf('}');
+      let jsonStart = cleaned.indexOf("{");
+      let jsonEnd = cleaned.lastIndexOf("}");
       if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
         let jsonCandidate = cleaned.substring(jsonStart, jsonEnd + 1);
         // Escape lại các xuống dòng thật bên trong chuỗi reply thành \n
@@ -287,14 +294,14 @@ export async function chatWithGemini(
           /"reply":\s*"([\s\S]*?)"/g,
           (match, p1) => {
             // Chỉ escape \n nếu không nằm trong chuỗi escape
-            return '"reply": "' + p1.replace(/\n/g, '\\n') + '"';
+            return '"reply": "' + p1.replace(/\n/g, "\\n") + '"';
           }
         );
         try {
           const obj = JSON.parse(jsonCandidate);
           if (
-            typeof obj.reply === 'string' &&
-            typeof obj.isEmergency === 'boolean'
+            typeof obj.reply === "string" &&
+            typeof obj.isEmergency === "boolean"
           ) {
             return {
               reply: obj.reply,

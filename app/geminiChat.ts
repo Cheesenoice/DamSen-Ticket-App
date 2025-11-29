@@ -1,8 +1,7 @@
 // Gemini Chat logic for Expo (React Native)
 // No Node.js, Express, or require; uses fetch
-// WARNING: API key is exposed in client-side code
 
-const GEMINI_API_KEY = "AIzaSyBU_B-e-FYx0-rvzKGY4RBYAfQl_RJfCQs";
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || "";
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" +
   GEMINI_API_KEY;

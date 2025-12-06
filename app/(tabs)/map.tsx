@@ -15,7 +15,9 @@ import {
 } from "react-native";
 import {
   PanGestureHandler,
+  PanGestureHandlerGestureEvent,
   PinchGestureHandler,
+  PinchGestureHandlerGestureEvent,
 } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -759,7 +761,7 @@ function useWebPanZoom(
     let pointerIds: number[] = [];
     let pointers: { [id: number]: { x: number; y: number } } = {};
     let panStart = { x: 0, y: 0, tx: 0, ty: 0 };
-    let pinchStart = { dist: 0, scale: 1 };
+    let pinchStart = { dist: 0, scale: 1, focalX: 0, focalY: 0, tx: 0, ty: 0 };
     let isDragging = false;
 
     const getDistance = (
@@ -801,7 +803,16 @@ function useWebPanZoom(
         // Pinch start
         const [id1, id2] = pointerIds;
         const dist = getDistance(pointers[id1], pointers[id2]);
-        pinchStart = { dist, scale: scale.value };
+        const focalX = (pointers[id1].x + pointers[id2].x) / 2;
+        const focalY = (pointers[id1].y + pointers[id2].y) / 2;
+        pinchStart = {
+          dist,
+          scale: scale.value,
+          focalX,
+          focalY,
+          tx: translateX.value,
+          ty: translateY.value,
+        };
       }
     };
     const onPointerMove = (e: PointerEvent) => {
@@ -844,8 +855,25 @@ function useWebPanZoom(
           // Pinch with 2 fingers
           const [id1, id2] = pointerIds;
           const dist = getDistance(pointers[id1], pointers[id2]);
+          const focalX = (pointers[id1].x + pointers[id2].x) / 2;
+          const focalY = (pointers[id1].y + pointers[id2].y) / 2;
+
           let newScale = pinchStart.scale * (dist / pinchStart.dist);
           newScale = Math.max(0.5, Math.min(2.5, newScale));
+
+          const centerX = MAP_WIDTH / 2;
+          const centerY = MAP_HEIGHT / 2;
+          const scaleRatio = newScale / pinchStart.scale;
+
+          translateX.value =
+            focalX -
+            centerX -
+            (pinchStart.focalX - pinchStart.tx - centerX) * scaleRatio;
+          translateY.value =
+            focalY -
+            centerY -
+            (pinchStart.focalY - pinchStart.ty - centerY) * scaleRatio;
+
           scale.value = newScale;
         }
       }
@@ -982,6 +1010,8 @@ const MapImage: React.FC<MapImageProps> = memo(
             ref={panRef}
             onGestureEvent={panGesture}
             simultaneousHandlers={pinchRef}
+            minPointers={1}
+            maxPointers={1}
           >
             <Animated.View
               style={[
@@ -1366,7 +1396,10 @@ const MapScreen: React.FC = () => {
   const lastScale = useRef(1);
 
   // Pan gesture
-  const panGesture = useAnimatedGestureHandler({
+  const panGesture = useAnimatedGestureHandler<
+    PanGestureHandlerGestureEvent,
+    any
+  >({
     onStart: (_: any, ctx: any) => {
       ctx.startX = translateX.value;
       ctx.startY = translateY.value;
@@ -1378,15 +1411,48 @@ const MapScreen: React.FC = () => {
   });
 
   // Pinch gesture
-  const pinchGesture = useAnimatedGestureHandler({
-    onStart: (_: any, ctx: any) => {
+  const pinchGesture = useAnimatedGestureHandler<
+    PinchGestureHandlerGestureEvent,
+    {
+      startScale: number;
+      startFocalX: number;
+      startFocalY: number;
+      startTranslateX: number;
+      startTranslateY: number;
+    }
+  >({
+    onStart: (event, ctx) => {
       ctx.startScale = scale.value;
+      ctx.startFocalX = event.focalX;
+      ctx.startFocalY = event.focalY;
+      ctx.startTranslateX = translateX.value;
+      ctx.startTranslateY = translateY.value;
     },
-    onActive: (event: any, ctx: any) => {
-      scale.value = Math.max(
+    onActive: (event, ctx) => {
+      const newScale = Math.max(
         0.5,
-        Math.min(2.5, ctx.startScale * (event.scale ?? 1))
+        Math.min(4, ctx.startScale * (event.scale ?? 1))
       );
+      scale.value = newScale;
+
+      // Calculate center offset
+      const centerX = MAP_WIDTH / 2;
+      const centerY = MAP_HEIGHT / 2;
+
+      // Calculate scale ratio
+      const scaleRatio = newScale / ctx.startScale;
+
+      // Adjust translation to keep focal point fixed relative to the screen
+      // Formula: TX_new = F_curr - C - (F_start - TX_start - C) * (Scale_new / Scale_start)
+      translateX.value =
+        event.focalX -
+        centerX -
+        (ctx.startFocalX - ctx.startTranslateX - centerX) * scaleRatio;
+
+      translateY.value =
+        event.focalY -
+        centerY -
+        (ctx.startFocalY - ctx.startTranslateY - centerY) * scaleRatio;
     },
     onEnd: () => {
       lastScale.current = scale.value;

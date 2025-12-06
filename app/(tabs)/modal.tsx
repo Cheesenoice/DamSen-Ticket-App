@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   Dimensions,
   Pressable,
+  Modal as RNModal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -55,7 +56,6 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ visible, onClose, onCaseSelect }) => {
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
-  if (!visible) return null;
 
   const handleCasePress = (caseKey: string) => {
     setSelectedCase(caseKey);
@@ -75,66 +75,75 @@ const Modal: React.FC<ModalProps> = ({ visible, onClose, onCaseSelect }) => {
   const caseObj = CASES.find((c) => c.key === selectedCase);
 
   return (
-    <View style={styles.absoluteOverlay}>
-      {/* Modal nhỏ khi chọn case */}
-      {selectedCase && caseObj ? (
-        <Pressable style={styles.modalBackdrop} onPress={handleModalClose}>
-          <View style={styles.modalContentBox}>
-            <TouchableOpacity
-              style={styles.modalCloseBtn}
-              onPress={handleModalClose}
-            >
-              <Text style={styles.modalCloseBtnText}>×</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalIcon}>{caseObj.icon}</Text>
-            <Text style={styles.modalTitle}>{caseObj.modalTitle}</Text>
-            <Text style={styles.modalDesc}>{caseObj.modalDesc}</Text>
-            <TouchableOpacity
-              style={styles.confirmBtn}
-              onPress={handleCaseConfirm}
-            >
-              <Text style={styles.confirmBtnText}>Xác nhận</Text>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
-      ) : (
-        <View style={styles.centeredBox}>
-          <View style={styles.whiteCard}>
-            <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-              <Text style={styles.modalCloseBtnText}>×</Text>
-            </TouchableOpacity>
-            <View style={styles.pinkCard}>
-              <View style={styles.header}>
-                <Text style={styles.headerTitle}>KHẨN CẤP</Text>
-                <Text style={styles.headerDesc}>
-                  Vui lòng xác nhận yêu cầu hỗ trợ{"\n"}khẩn cấp của bạn
+    <RNModal
+      transparent
+      visible={visible}
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <View style={styles.absoluteOverlay}>
+        {/* Modal nhỏ khi chọn case */}
+        {selectedCase && caseObj ? (
+          <Pressable style={styles.modalBackdrop} onPress={handleModalClose}>
+            <View style={styles.modalContentBox}>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={handleModalClose}
+              >
+                <Text style={styles.modalCloseBtnText}>×</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalIcon}>{caseObj.icon}</Text>
+              <Text style={styles.modalTitle}>{caseObj.modalTitle}</Text>
+              <Text style={styles.modalDesc}>{caseObj.modalDesc}</Text>
+              <TouchableOpacity
+                style={styles.confirmBtn}
+                onPress={handleCaseConfirm}
+              >
+                <Text style={styles.confirmBtnText}>Xác nhận</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        ) : (
+          <View style={styles.centeredBox}>
+            <View style={styles.whiteCard}>
+              <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
+                <Text style={styles.modalCloseBtnText}>×</Text>
+              </TouchableOpacity>
+              <View style={styles.pinkCard}>
+                <View style={styles.header}>
+                  <Text style={styles.headerTitle}>KHẨN CẤP</Text>
+                  <Text style={styles.headerDesc}>
+                    Vui lòng xác nhận yêu cầu hỗ trợ{"\n"}khẩn cấp của bạn
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.buttonGroup}>
+                {CASES.map((c) => (
+                  <TouchableOpacity
+                    key={c.key}
+                    style={styles.emergencyButton}
+                    onPress={() => handleCasePress(c.key)}
+                    activeOpacity={0.85}
+                  >
+                    <View style={styles.iconContainer}>
+                      <Text style={styles.iconText}>{c.icon}</Text>
+                    </View>
+                    <Text style={styles.buttonText}>{c.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>
+                  Vị trí hiện tại của bạn sẽ được chia sẻ{"\n"}với đội ngũ hỗ
+                  trợ
                 </Text>
               </View>
             </View>
-            <View style={styles.buttonGroup}>
-              {CASES.map((c) => (
-                <TouchableOpacity
-                  key={c.key}
-                  style={styles.emergencyButton}
-                  onPress={() => handleCasePress(c.key)}
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.iconContainer}>
-                    <Text style={styles.iconText}>{c.icon}</Text>
-                  </View>
-                  <Text style={styles.buttonText}>{c.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>
-                Vị trí hiện tại của bạn sẽ được chia sẻ{"\n"}với đội ngũ hỗ trợ
-              </Text>
-            </View>
           </View>
-        </View>
-      )}
-    </View>
+        )}
+      </View>
+    </RNModal>
   );
 };
 

@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import {
@@ -17,9 +18,11 @@ import {
   PinchGestureHandler,
 } from "react-native-gesture-handler";
 import Animated, {
+  runOnJS,
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
@@ -198,15 +201,60 @@ const Hotspot: React.FC<{
   x: number;
   y: number;
   onPress: () => void;
-}> = memo(({ x, y, onPress }) => (
-  <TouchableOpacity
-    style={[styles.hotspot, { left: x - 18, top: y - 18 }]}
-    onPress={onPress}
-    activeOpacity={0.8}
-  >
-    <View style={styles.hotspotDot} />
-  </TouchableOpacity>
-));
+}> = memo(({ x, y, onPress }) => {
+  if (isWeb) {
+    return (
+      <div
+        className="map-hotspot"
+        data-hotspot="true"
+        style={{
+          position: "absolute",
+          left: x - 18,
+          top: y - 18,
+          width: 36,
+          height: 36,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 50,
+          cursor: "pointer",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onPress();
+        }}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <div
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: 9,
+            backgroundColor: "#E91E63",
+            border: "3px solid #fff",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+            pointerEvents: "none",
+          }}
+        />
+      </div>
+    );
+  }
+  return (
+    <TouchableOpacity
+      style={[styles.hotspot, { left: x - 18, top: y - 18 }]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View style={styles.hotspotDot} />
+    </TouchableOpacity>
+  );
+});
 
 // Current Location Dot
 const CurrentLocation: React.FC<{ x: number; y: number }> = memo(({ x, y }) => (
@@ -601,7 +649,7 @@ const RoutePath: React.FC<{
         position: "absolute",
         left: 0,
         top: 0,
-        zIndex: DEBUG_MODE ? 1000 : 10,
+        zIndex: DEBUG_MODE ? 1000 : 5,
         pointerEvents: DEBUG_MODE ? "auto" : "none",
       }}
     >
@@ -712,6 +760,7 @@ function useWebPanZoom(
     let pointers: { [id: number]: { x: number; y: number } } = {};
     let panStart = { x: 0, y: 0, tx: 0, ty: 0 };
     let pinchStart = { dist: 0, scale: 1 };
+    let isDragging = false;
 
     const getDistance = (
       a: { x: number; y: number },
@@ -723,9 +772,23 @@ function useWebPanZoom(
     };
 
     const onPointerDown = (e: PointerEvent) => {
+      // Don't interfere with hotspot clicks
+      const target = e.target as HTMLElement;
+      // Check for hotspot markers using multiple methods
+      if (
+        target &&
+        (target.closest('[data-hotspot="true"]') ||
+          target.closest(".map-hotspot") ||
+          target.classList.contains("map-hotspot"))
+      ) {
+        return;
+      }
+
       el.setPointerCapture(e.pointerId);
       pointerIds.push(e.pointerId);
       pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      isDragging = false;
+
       if (e.pointerType === "mouse" || pointerIds.length === 1) {
         // Pan start
         panStart = {
@@ -744,6 +807,7 @@ function useWebPanZoom(
     const onPointerMove = (e: PointerEvent) => {
       if (!pointerIds.includes(e.pointerId)) return;
       pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+
       if (
         e.pointerType === "mouse" &&
         pointerIds.length === 1 &&
@@ -752,15 +816,30 @@ function useWebPanZoom(
         // Pan with mouse
         const dx = e.clientX - panStart.x;
         const dy = e.clientY - panStart.y;
-        translateX.value = panStart.tx + dx;
-        translateY.value = panStart.ty + dy;
+
+        // Only start dragging if moved more than 5px
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+          isDragging = true;
+        }
+
+        if (isDragging) {
+          translateX.value = panStart.tx + dx;
+          translateY.value = panStart.ty + dy;
+        }
       } else if (e.pointerType === "touch") {
         if (pointerIds.length === 1) {
           // Pan with 1 finger
           const dx = e.clientX - panStart.x;
           const dy = e.clientY - panStart.y;
-          translateX.value = panStart.tx + dx;
-          translateY.value = panStart.ty + dy;
+
+          if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            isDragging = true;
+          }
+
+          if (isDragging) {
+            translateX.value = panStart.tx + dx;
+            translateY.value = panStart.ty + dy;
+          }
         } else if (pointerIds.length === 2) {
           // Pinch with 2 fingers
           const [id1, id2] = pointerIds;
@@ -775,16 +854,37 @@ function useWebPanZoom(
       el.releasePointerCapture(e.pointerId);
       pointerIds = pointerIds.filter((id) => id !== e.pointerId);
       delete pointers[e.pointerId];
+      isDragging = false;
     };
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+
+      if (e.ctrlKey) {
+        // Pinch zoom (Trackpad pinch or Ctrl+Wheel)
+        // deltaY is negative when zooming in (fingers spread)
+        const zoomSensitivity = 0.005;
+        const newScale = scale.value - e.deltaY * zoomSensitivity;
+        scale.value = Math.max(0.5, Math.min(2.5, newScale));
+      } else {
+        // Pan (Trackpad two-finger drag or Mouse wheel)
+        translateX.value = translateX.value - e.deltaX;
+        translateY.value = translateY.value - e.deltaY;
+      }
+    };
+
     el.addEventListener("pointerdown", onPointerDown);
     el.addEventListener("pointermove", onPointerMove);
     el.addEventListener("pointerup", onPointerUp);
     el.addEventListener("pointercancel", onPointerUp);
+    el.addEventListener("wheel", onWheel, { passive: false });
+
     return () => {
       el.removeEventListener("pointerdown", onPointerDown);
       el.removeEventListener("pointermove", onPointerMove);
       el.removeEventListener("pointerup", onPointerUp);
       el.removeEventListener("pointercancel", onPointerUp);
+      el.removeEventListener("wheel", onWheel);
     };
   }, [scale, translateX, translateY]);
 }
@@ -816,90 +916,6 @@ const MapImage: React.FC<MapImageProps> = memo(
     });
     const containerRef = React.useRef<HTMLDivElement>(null);
 
-    // Web pointer handlers
-    React.useEffect(() => {
-      if (!isWeb || !containerRef.current) return;
-      const el = containerRef.current;
-      let pointerIds: number[] = [];
-      let pointers: { [id: number]: { x: number; y: number } } = {};
-      let panStart = { x: 0, y: 0, tx: 0, ty: 0 };
-      let pinchStart = { dist: 0, scale: 1 };
-
-      const getDistance = (
-        a: { x: number; y: number },
-        b: { x: number; y: number }
-      ) => {
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        return Math.sqrt(dx * dx + dy * dy);
-      };
-
-      const onPointerDown = (e: PointerEvent) => {
-        el.setPointerCapture(e.pointerId);
-        pointerIds.push(e.pointerId);
-        pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
-        if (e.pointerType === "mouse" || pointerIds.length === 1) {
-          // Pan start
-          panStart = {
-            x: e.clientX,
-            y: e.clientY,
-            tx: translateX.value,
-            ty: translateY.value,
-          };
-        } else if (pointerIds.length === 2) {
-          // Pinch start
-          const [id1, id2] = pointerIds;
-          const dist = getDistance(pointers[id1], pointers[id2]);
-          pinchStart = { dist, scale: scale.value };
-        }
-      };
-      const onPointerMove = (e: PointerEvent) => {
-        if (!pointerIds.includes(e.pointerId)) return;
-        pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
-        if (
-          e.pointerType === "mouse" &&
-          pointerIds.length === 1 &&
-          e.buttons === 1
-        ) {
-          // Pan with mouse
-          const dx = e.clientX - panStart.x;
-          const dy = e.clientY - panStart.y;
-          translateX.value = panStart.tx + dx;
-          translateY.value = panStart.ty + dy;
-        } else if (e.pointerType === "touch") {
-          if (pointerIds.length === 1) {
-            // Pan with 1 finger
-            const dx = e.clientX - panStart.x;
-            const dy = e.clientY - panStart.y;
-            translateX.value = panStart.tx + dx;
-            translateY.value = panStart.ty + dy;
-          } else if (pointerIds.length === 2) {
-            // Pinch with 2 fingers
-            const [id1, id2] = pointerIds;
-            const dist = getDistance(pointers[id1], pointers[id2]);
-            let newScale = pinchStart.scale * (dist / pinchStart.dist);
-            newScale = Math.max(0.5, Math.min(2.5, newScale));
-            scale.value = newScale;
-          }
-        }
-      };
-      const onPointerUp = (e: PointerEvent) => {
-        el.releasePointerCapture(e.pointerId);
-        pointerIds = pointerIds.filter((id) => id !== e.pointerId);
-        delete pointers[e.pointerId];
-      };
-      el.addEventListener("pointerdown", onPointerDown);
-      el.addEventListener("pointermove", onPointerMove);
-      el.addEventListener("pointerup", onPointerUp);
-      el.addEventListener("pointercancel", onPointerUp);
-      return () => {
-        el.removeEventListener("pointerdown", onPointerDown);
-        el.removeEventListener("pointermove", onPointerMove);
-        el.removeEventListener("pointerup", onPointerUp);
-        el.removeEventListener("pointercancel", onPointerUp);
-      };
-    }, [scale, translateX, translateY]);
-
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [
         { translateX: translateX.value },
@@ -914,15 +930,22 @@ const MapImage: React.FC<MapImageProps> = memo(
         <div
           ref={containerRef}
           style={{
-            width: MAP_WIDTH,
-            height: MAP_HEIGHT,
+            width: "100%",
+            height: "100%",
             touchAction: "none",
             position: "relative",
             overflow: "hidden",
           }}
         >
           <Animated.View
-            style={[{ width: MAP_WIDTH, height: MAP_HEIGHT }, animatedStyle]}
+            style={[
+              {
+                width: MAP_WIDTH,
+                height: MAP_HEIGHT,
+                pointerEvents: "box-none",
+              },
+              animatedStyle,
+            ]}
           >
             <Image
               source={require("../../assets/images/damsen-map.webp")}
@@ -1114,6 +1137,92 @@ const HotspotInfo: React.FC<{
   </>
 ));
 
+// Web Draggable Handle Component
+const WebDraggableHandle: React.FC<{
+  translateY: Animated.SharedValue<number>;
+  onClose: () => void;
+  sheetHeight: number;
+}> = ({ translateY, onClose, sheetHeight }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let startY = 0;
+    let startTransY = 0;
+    let isDragging = false;
+
+    const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
+      startY = e.clientY;
+      startTransY = translateY.value;
+      el.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+      e.preventDefault();
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isDragging) return;
+      const delta = e.clientY - startY;
+      const nextY = startTransY + delta;
+
+      // Allow dragging up with resistance (elastic effect)
+      if (nextY < 0) {
+        translateY.value = nextY * 0.3;
+      } else {
+        translateY.value = nextY;
+      }
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      el.releasePointerCapture(e.pointerId);
+
+      const delta = e.clientY - startY;
+      if (delta > 100) {
+        onClose();
+      } else {
+        translateY.value = withTiming(0, { duration: 300 });
+      }
+    };
+
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerup", onPointerUp);
+
+    return () => {
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerup", onPointerUp);
+    };
+  }, [translateY, onClose, sheetHeight]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        width: "100%",
+        padding: "10px 0",
+        display: "flex",
+        justifyContent: "center",
+        cursor: "grab",
+        touchAction: "none",
+      }}
+    >
+      <div
+        style={{
+          width: 40,
+          height: 4,
+          backgroundColor: "#E0E0E0",
+          borderRadius: 2,
+        }}
+      />
+    </div>
+  );
+};
+
 // Bottom Sheet
 const BottomSheet: React.FC<{
   visible: boolean;
@@ -1127,6 +1236,31 @@ const BottomSheet: React.FC<{
   const animatedSheetStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: sheetTranslateY.value }],
   }));
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: (_, ctx: any) => {
+      ctx.startY = sheetTranslateY.value;
+    },
+    onActive: (event, ctx: any) => {
+      const nextY = ctx.startY + event.translationY;
+      // Limit to not go above 0 (expanded state)
+      sheetTranslateY.value = Math.max(0, nextY);
+    },
+    onEnd: (event) => {
+      if (event.translationY > 100 || event.velocityY > 500) {
+        // Close
+        sheetTranslateY.value = withTiming(SHEET_HEIGHT, {}, (finished) => {
+          if (finished) {
+            runOnJS(onClose)();
+          }
+        });
+      } else {
+        // Snap back open
+        sheetTranslateY.value = withTiming(0);
+      }
+    },
+  });
+
   React.useEffect(() => {
     if (visible) {
       sheetTranslateY.value = withTiming(0, { duration: 300 });
@@ -1137,7 +1271,25 @@ const BottomSheet: React.FC<{
 
   return (
     <Animated.View style={[styles.bottomSheet, animatedSheetStyle]}>
-      <View style={navStyles.sheetHandle} />
+      {isWeb ? (
+        <WebDraggableHandle
+          translateY={sheetTranslateY}
+          onClose={onClose}
+          sheetHeight={SHEET_HEIGHT}
+        />
+      ) : (
+        <PanGestureHandler onGestureEvent={gestureHandler}>
+          <Animated.View
+            style={{
+              width: "100%",
+              alignItems: "center",
+              paddingVertical: 10,
+            }}
+          >
+            <View style={navStyles.sheetHandle} />
+          </Animated.View>
+        </PanGestureHandler>
+      )}
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 24 }}
@@ -1198,6 +1350,7 @@ const BottomSheet: React.FC<{
 // --- Main MapScreen ---
 const MapScreen: React.FC = () => {
   const router = useRouter();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [selectedHotspot, setSelectedHotspot] = useState<HotspotType | null>(
     null
   );
@@ -1242,14 +1395,47 @@ const MapScreen: React.FC = () => {
 
   // Go to current location (center the blue dot)
   const goToCurrentLocation = () => {
-    scale.value = withTiming(1, { duration: 200 }, (finished?: boolean) => {
-      if (finished) {
-        const centerX = SCREEN_WIDTH / 2 - CURRENT_LOCATION.x * 1;
-        const centerY = SCREEN_HEIGHT / 2 - CURRENT_LOCATION.y * 1;
-        translateX.value = withTiming(centerX, { duration: 300 });
-        translateY.value = withTiming(centerY, { duration: 300 });
-      }
-    });
+    const targetScale = 1;
+    const centerX = windowWidth / 2 - CURRENT_LOCATION.x;
+    const centerY = windowHeight / 2 - CURRENT_LOCATION.y;
+
+    if (isWeb) {
+      // Manual animation loop for Web to ensure smoothness
+      const startScale = scale.value;
+      const startX = translateX.value;
+      const startY = translateY.value;
+      const startTime = Date.now();
+      const duration = 1000; // 1000ms = 1s
+
+      const animate = () => {
+        const now = Date.now();
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Easing: EaseOutExpo (giống Google Maps)
+        // 1 - Math.pow(2, -10 * progress)
+        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+
+        scale.value = startScale + (targetScale - startScale) * ease;
+        translateX.value = startX + (centerX - startX) * ease;
+        translateY.value = startY + (centerY - startY) * ease;
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      requestAnimationFrame(animate);
+    } else {
+      // Mobile implementation
+      const springConfig = {
+        damping: 20,
+        stiffness: 90,
+        mass: 1,
+      };
+      scale.value = withSpring(targetScale, springConfig);
+      translateX.value = withSpring(centerX, springConfig);
+      translateY.value = withSpring(centerY, springConfig);
+    }
   };
 
   // Tự động zoom vào vị trí hiện tại khi vào trang map
@@ -1462,7 +1648,8 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 10,
+    zIndex: 50,
+    pointerEvents: "auto",
   },
   hotspotDot: {
     width: 18,
@@ -1510,7 +1697,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: -200, // Extend below screen to cover elastic pull gap
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -1524,7 +1711,7 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     zIndex: 10,
     paddingHorizontal: 20,
-    paddingBottom: 2,
+    paddingBottom: 202, // Compensate for bottom: -200
   },
   cardHeader: {
     flexDirection: "row",
@@ -1671,7 +1858,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 20,
+    zIndex: 30,
   },
   currentLocationBtn: {
     position: "absolute",

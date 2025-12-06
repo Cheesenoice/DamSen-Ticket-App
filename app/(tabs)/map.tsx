@@ -883,6 +883,17 @@ function useWebPanZoom(
       pointerIds = pointerIds.filter((id) => id !== e.pointerId);
       delete pointers[e.pointerId];
       isDragging = false;
+
+      // If we have 1 pointer left, we need to reset panStart so it doesn't jump
+      if (pointerIds.length === 1) {
+        const id = pointerIds[0];
+        panStart = {
+          x: pointers[id].x,
+          y: pointers[id].y,
+          tx: translateX.value,
+          ty: translateY.value,
+        };
+      }
     };
 
     const onWheel = (e: WheelEvent) => {

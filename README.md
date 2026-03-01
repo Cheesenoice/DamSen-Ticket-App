@@ -17,7 +17,7 @@
 
 - **🔗 Web Demo:** [https://damsenapp.netlify.app/](https://damsenapp.netlify.app/)
 - **🎨 Figma Design:** [Xem thiết kế UI/UX](https://www.figma.com/design/rz6JzjI710R9xLjnkebHwC/damsen-app?fuid=1465730408892692823)
-- **📄 Báo cáo:** [REPORT_DamSen_Ticket_App.pdf](./Slide%20and%20Report/REPORT_DamSen_Ticket_App.pdf](https://drive.google.com/file/d/15NytZqCL4v2js2MsI81zi02og9nqc1Qc/view?usp=sharing))
+- **📄 Báo cáo:** [REPORT_DamSen_Ticket_App.pdf](https://drive.google.com/file/d/15NytZqCL4v2js2MsI81zi02og9nqc1Qc/view?usp=sharing)
 - **📊 Slide:** [SLIDE_DamSen_Ticket_App.pdf](https://drive.google.com/file/d/1U0Ij474_0Li8jsnhtnINOs5RL0QDi6Mi/view?usp=sharing)
 
 ## ✨ Tính năng nổi bật

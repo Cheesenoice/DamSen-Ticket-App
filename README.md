@@ -15,10 +15,33 @@
 
 ## 🌐 Demo & Tài nguyên
 
-- **🔗 Web Demo:** [https://damsenapp.netlify.app/](https://damsenapp.netlify.app/)
+- **🔗 Web Demo (still online):** [https://damsenapp.netlify.app/](https://damsenapp.netlify.app/)
+- **🎬 YouTube Demo:** [https://youtube.com/shorts/0-rOu0qZaA8?feature=share](https://youtube.com/shorts/0-rOu0qZaA8?feature=share)
 - **🎨 Figma Design:** [Xem thiết kế UI/UX](https://www.figma.com/design/rz6JzjI710R9xLjnkebHwC/damsen-app?fuid=1465730408892692823)
 - **📄 Báo cáo:** [REPORT_DamSen_Ticket_App.pdf](https://drive.google.com/file/d/15NytZqCL4v2js2MsI81zi02og9nqc1Qc/view?usp=sharing)
 - **📊 Slide:** [SLIDE_DamSen_Ticket_App.pdf](https://drive.google.com/file/d/1U0Ij474_0Li8jsnhtnINOs5RL0QDi6Mi/view?usp=sharing)
+
+## 🖼️ Ảnh demo ứng dụng
+
+### Bản đồ tổng quan công viên
+
+![DamSen Park Full Map](./assets/images/damsen-map.webp)
+
+### Giao diện chính
+
+![DamSen App Main UI](./github-assets/main-ui.png)
+
+### Luồng mua vé
+
+![DamSen App Buy Ticket Flow](./github-assets/buy-ticket-flow.png)
+
+### Bản đồ và điều hướng
+
+![DamSen App Map Tab](./github-assets/map-tab.png)
+
+### Tình huống khẩn cấp (SOS)
+
+![DamSen App Urgent Case](./github-assets/urgent-case.png)
 
 ## ✨ Tính năng nổi bật
 
@@ -141,9 +164,11 @@
     ```
 
 4.  **Chạy ứng dụng:**
+
     ```bash
     npx expo start
     ```
+
     - Quét mã QR bằng ứng dụng **Expo Go** (Android/iOS).
     - Hoặc nhấn `w` để chạy trên trình duyệt web.
 
